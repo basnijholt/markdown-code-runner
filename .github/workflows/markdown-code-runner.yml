@@ -23,6 +23,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
+          # Install dependencies you're using in your README.md
           pip install pandas tabulate pytest matplotlib
           pip install .
 

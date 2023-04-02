@@ -168,7 +168,120 @@ Hello again!
 
 Markdown Code Runner can be used for various purposes, such as creating Markdown tables, generating visualizations, and showcasing code examples with live outputs. Here are some usage ideas to get you started:
 
-### :bar_chart: Idea 1: Generating Markdown Tables
+## :gear: Idea 1: Continuous Integration with GitHub Actions
+
+You can use `markdown-code-runner` to automatically update your Markdown files in a CI environment.
+The following example demonstrates how to configure a GitHub Actions workflow that updates your `README.md` whenever changes are pushed to the `main` branch.
+
+1. Create a new workflow file in your repository at `.github/workflows/markdown-code-runner.yml`.
+
+2. Add the following content to the workflow file:
+
+<!-- START_CODE -->
+<!-- print("```yaml") -->
+<!-- with open(".github/workflows/markdown-code-runner.yml") as f: -->
+<!--   print(f.read().replace("pip install .", "pip install markdown-code-runner")) -->
+<!-- print("```") -->
+<!-- END_CODE -->
+<!-- START_OUTPUT -->
+<!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
+```yaml
+name: Update README.md
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update_readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install dependencies you're using in your README.md
+          pip install pandas tabulate pytest matplotlib
+          pip install markdown-code-runner
+
+      - name: Run update-readme.py
+        run: markdown-code-runner README.md
+
+      - name: Commit updated README.md
+        run: |
+          git add README.md
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update README.md"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
+```
+
+<!-- END_OUTPUT -->
+
+3.  Commit and push the workflow file to your repository. The workflow will now automatically run whenever you push changes to the `main` branch, updating your `README.md` with the latest outputs from your code blocks.
+
+For more information on configuring GitHub Actions, check out the [official documentation](https://docs.github.com/en/actions/learn-github-actions/introduction-to-github-actions).
+
+## :computer: Idea 1: Show command-line output
+
+Use `markdown-code-runner` to display the output of a command-line program. For example, the following Markdown file shows the helper options of this package:
+<!-- SKIP -->
+```markdown
+<!-- START_CODE -->
+<!-- import subprocess -->
+<!-- out = subprocess.run(["markdown-code-runner", "--help"], capture_output=True, text=True) -->
+<!-- print(f"```bash\n{out.stdout}\n```") -->
+<!-- END_CODE -->
+<!-- START_OUTPUT -->
+<!-- END_OUTPUT -->
+```
+
+Which is rendered as:
+
+<!-- START_CODE -->
+<!-- import subprocess -->
+<!-- out = subprocess.run(["markdown-code-runner", "--help"], capture_output=True, text=True) -->
+<!-- print(f"```bash\n{out.stdout}\n```") -->
+<!-- END_CODE -->
+<!-- START_OUTPUT -->
+<!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
+```bash
+usage: markdown-code-runner [-h] [-o OUTPUT] [-d] input
+
+Automatically update Markdown files with code block output.
+
+positional arguments:
+  input                 Path to the input Markdown file.
+
+options:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        Path to the output Markdown file. (default: overwrite
+                        input file)
+  -d, --debug           Enable debugging mode (default: False)
+
+```
+
+<!-- END_OUTPUT -->
+
+### :bar_chart: Idea 2: Generating Markdown Tables
 
 Use the `pandas` library to create a Markdown table from a DataFrame. The following example demonstrates how to create a table with random data:
 
@@ -210,7 +323,7 @@ print(df.to_markdown(index=False))
 
 <!-- END_OUTPUT -->
 
-### :art: Idea 2: Generating Visualizations
+### :art: Idea 3: Generating Visualizations
 
 Create a visualization using the `matplotlib` library and save it as an image. Then, reference the image in your Markdown file. The following example demonstrates how to create a bar chart:
 
@@ -280,7 +393,7 @@ print(img_html)
 
 <!-- END_OUTPUT -->
 
-### :star: Idea 3: Generating a table from CSV data
+### :star: Idea 4: Generating a table from CSV data
 
 Suppose you have a CSV file containing data that you want to display as a table in your Markdown file.
 You can use `pandas` to read the CSV file, convert it to a DataFrame, and then output it as a Markdown table.
@@ -322,7 +435,7 @@ You can use `pandas` to read the CSV file, convert it to a DataFrame, and then o
 
 <!-- END_OUTPUT -->
 
-### :star: Idea 4: Displaying API data as a list
+### :star: Idea 5: Displaying API data as a list
 
 You can use `markdown-code-runner` to make API calls and display the data as a list in your Markdown file.
 In this example, we'll use the `requests` library to fetch data from an API and display the results as a list.
