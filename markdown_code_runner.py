@@ -83,7 +83,10 @@ def process_markdown(content: list[str]) -> list[str]:
             in_code_block = True
         elif MARKERS["start_output"] in line:
             in_output_block = True
-            assert isinstance(output, list), "Output must be a list"
+            assert isinstance(
+                output,
+                list,
+            ), f"Output must be a list, not {type(output)}"
             new_lines.extend([line, MARKERS["warning"], *output])
             output = None
         elif MARKERS["end_output"] in line:

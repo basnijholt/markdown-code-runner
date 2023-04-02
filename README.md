@@ -9,15 +9,20 @@ The package is hosted on GitHub: [https://github.com/basnijholt/markdown-code-ru
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [:question: Problem Statement](#question-problem-statement)
-- [:computer: Installation](#computer-installation)
-- [:rocket: Quick Start](#rocket-quick-start)
-- [Usage](#usage)
-- [:book: Examples](#book-examples)
-  - [:star: Example 1: Simple code block](#star-example-1-simple-code-block)
-  - [:star: Example 2: Multiple code blocks](#star-example-2-multiple-code-blocks)
-- [:page_with_curl: License](#page_with_curl-license)
-- [:handshake: Contributing](#handshake-contributing)
+- [:rocket: Markdown Code Runner](#rocket-markdown-code-runner)
+  - [:books: Table of Contents](#books-table-of-contents)
+  - [:question: Problem Statement](#question-problem-statement)
+  - [:computer: Installation](#computer-installation)
+  - [:rocket: Quick Start](#rocket-quick-start)
+  - [Usage](#usage)
+  - [:book: Examples](#book-examples)
+    - [:star: Example 1: Simple code block](#star-example-1-simple-code-block)
+    - [:star: Example 2: Multiple code blocks](#star-example-2-multiple-code-blocks)
+  - [:bulb: Usage Ideas](#bulb-usage-ideas)
+    - [:bar\_chart: Generating Markdown Tables](#bar_chart-generating-markdown-tables)
+    - [:art: Generating Visualizations](#art-generating-visualizations)
+  - [:page\_with\_curl: License](#page_with_curl-license)
+  - [:handshake: Contributing](#handshake-contributing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -64,8 +69,7 @@ markdown-code-runner /path/to/your/markdown_file.md
 
 4.  The output of the code block will be automatically executed and inserted between the output markers.
 
-Usage
------
+## Usage
 
 To use `markdown-code-runner`, simply import the `update_markdown_file` function from the package and call it with the path to your Markdown file:
 
@@ -151,6 +155,102 @@ Hello again!
 
 <!-- END_OUTPUT -->
 ```
+
+## :bulb: Usage Ideas
+
+Markdown Code Runner can be used for various purposes, such as creating Markdown tables, generating visualizations, and showcasing code examples with live outputs. Here are some usage ideas to get you started:
+
+### :bar_chart: Generating Markdown Tables
+
+Use the `pandas` library to create a Markdown table from a DataFrame. The following example demonstrates how to create a table with random data:
+
+```python
+import pandas as pd
+import numpy as np
+
+# Generate random data
+np.random.seed(42)
+data = np.random.randint(1, 101, size=(5, 3))
+
+# Create a DataFrame and column names
+df = pd.DataFrame(data, columns=["Column A", "Column B", "Column C"])
+
+# Convert the DataFrame to a Markdown table
+print(df.to_markdown(index=False))
+```
+
+<!-- START_CODE -->
+<!-- import pandas as pd -->
+<!-- import numpy as np -->
+<!-- # Generate random data -->
+<!-- np.random.seed(42) -->
+<!-- data = np.random.randint(1, 101, size=(5, 3)) -->
+<!-- # Create a DataFrame and column names -->
+<!-- df = pd.DataFrame(data, columns=["Column A", "Column B", "Column C"]) -->
+<!-- # Convert the DataFrame to a Markdown table -->
+<!-- print(df.to_markdown(index=False)) -->
+<!-- END_CODE -->
+<!-- START_OUTPUT -->
+<!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
+
+| Column A | Column B | Column C |
+| --- | --- | --- |
+| 52 | 93 | 15 |
+| 72 | 61 | 21 |
+| 83 | 87 | 75 |
+| 75 | 88 | 24 |
+| 3 | 22 | 53 |
+
+<!-- END_OUTPUT -->
+
+### :art: Generating Visualizations
+
+Create a visualization using the `matplotlib` library and save it as an image. Then, reference the image in your Markdown file. The following example demonstrates how to create a bar chart:
+
+```python
+import matplotlib.pyplot as plt
+
+# Data for the bar chart
+categories = ["A", "B", "C"]
+values = [25, 45, 30]
+
+# Create the bar chart
+plt.bar(categories, values)
+plt.xlabel("Categories")
+plt.ylabel("Values")
+plt.title("Sample Bar Chart")
+
+# Save the chart as an image
+plt.savefig("bar_chart.png")
+plt.close()
+```
+
+<!-- START_CODE -->
+<!-- import matplotlib.pyplot as plt
+
+<!-- # Data for the bar chart -->
+<!-- categories = ["A", "B", "C"] -->
+<!-- values = [25, 45, 30] -->
+
+<!-- # Create the bar chart -->
+<!-- plt.bar(categories, values) -->
+<!-- plt.xlabel("Categories") -->
+<!-- plt.ylabel("Values") -->
+<!-- plt.title("Sample Bar Chart") -->
+
+<!-- # Save the chart as an image -->
+<!-- plt.savefig("bar_chart.png") -->
+<!-- plt.close() --> -->
+<!-- END_CODE -->
+<!-- START_OUTPUT -->
+<!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
+Saved the bar chart as 'bar_chart.png'
+
+<!-- END_OUTPUT -->
+
+![Sample Bar Chart](bar_chart.png)
+
+These are just a few examples of how you can use Markdown Code Runner to enhance your Markdown documents with dynamic content. The possibilities are endless!
 
 
 ## :page_with_curl: License
