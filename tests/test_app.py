@@ -125,9 +125,9 @@ def test_execute_code_block() -> None:
 
 def test_main_no_arguments(tmp_path: Path) -> None:
     """Test the main function with no arguments."""
-    test_filepath = Path("tests/test.md")
+    test_filepath = TEST_FOLDER / "test.md"
     output_filepath = tmp_path / "output.md"
-    expected_output_filepath = Path("tests/expected_output.md")
+    expected_output_filepath = TEST_FOLDER / "test_expected_output.md"
 
     with patch(
         "argparse.ArgumentParser.parse_args",
@@ -141,9 +141,9 @@ def test_main_no_arguments(tmp_path: Path) -> None:
 
 def test_main_filepath_argument(tmp_path: Path) -> None:
     """Test the main function with a filepath argument."""
-    test_filepath = Path("tests/test.md")
+    test_filepath = TEST_FOLDER / "test.md"
     output_filepath = tmp_path / "output.md"
-    expected_output_filepath = Path("tests/expected_output.md")
+    expected_output_filepath = TEST_FOLDER / "test_expected_output.md"
 
     with patch(
         "argparse.ArgumentParser.parse_args",
@@ -161,9 +161,9 @@ def test_main_filepath_argument(tmp_path: Path) -> None:
 
 def test_main_debug_mode(capfd: pytest.CaptureFixture, tmp_path: Path) -> None:
     """Test the main function with debug mode enabled."""
-    test_filepath = Path("tests/test.md")
+    test_filepath = TEST_FOLDER / "test.md"
     output_filepath = tmp_path / "output.md"
-    expected_output_filepath = Path("tests/expected_output.md")
+    expected_output_filepath = TEST_FOLDER / "test_expected_output.md"
 
     with patch(
         "argparse.ArgumentParser.parse_args",
