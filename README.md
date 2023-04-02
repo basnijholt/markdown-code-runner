@@ -4,32 +4,33 @@
 
 The package is hosted on GitHub: [https://github.com/basnijholt/markdown-code-runner](https://github.com/basnijholt/markdown-code-runner)
 
-## :books: Table of Contents
-
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [:question: Problem Statement](#question-problem-statement)
-- [:computer: Installation](#computer-installation)
-- [:rocket: Quick Start](#rocket-quick-start)
-- [Usage](#usage)
-- [:book: Examples](#book-examples)
-  - [:star: Example 1: Simple code block](#star-example-1-simple-code-block)
-  - [:star: Example 2: Multiple code blocks](#star-example-2-multiple-code-blocks)
-- [:bulb: Usage Ideas](#bulb-usage-ideas)
-  - [:bar_chart: Generating Markdown Tables](#bar_chart-generating-markdown-tables)
-  - [:art: Generating Visualizations](#art-generating-visualizations)
-- [:page_with_curl: License](#page_with_curl-license)
-- [:handshake: Contributing](#handshake-contributing)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-
 ## :question: Problem Statement
 
 When creating Markdown files with code examples, it's essential to keep the output of these code snippets accurate and up-to-date. Manually updating the output can be time-consuming and error-prone, especially when working with large files or multiple collaborators.
 
 `markdown-code-runner` solves this problem by automatically executing the code blocks within a Markdown file and updating the output in-place. This ensures that the displayed output is always in sync with the code.
+
+## :books: Table of Contents
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [:rocket: Markdown Code Runner](#rocket-markdown-code-runner)
+  - [:question: Problem Statement](#question-problem-statement)
+  - [:books: Table of Contents](#books-table-of-contents)
+  - [:computer: Installation](#computer-installation)
+  - [:rocket: Quick Start](#rocket-quick-start)
+  - [Usage](#usage)
+  - [:book: Examples](#book-examples)
+    - [:star: Example 1: Simple code block](#star-example-1-simple-code-block)
+    - [:star: Example 2: Multiple code blocks](#star-example-2-multiple-code-blocks)
+  - [:bulb: Usage Ideas](#bulb-usage-ideas)
+    - [:bar\_chart: Generating Markdown Tables](#bar_chart-generating-markdown-tables)
+    - [:art: Generating Visualizations](#art-generating-visualizations)
+  - [:page\_with\_curl: License](#page_with_curl-license)
+  - [:handshake: Contributing](#handshake-contributing)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## :computer: Installation
 
