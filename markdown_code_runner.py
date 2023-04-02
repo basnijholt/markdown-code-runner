@@ -109,7 +109,7 @@ def update_markdown_file(
     debug: bool = False,
 ) -> None:
     """Rewrite a Markdown file by executing and updating code blocks."""
-    if isinstance(input_filepath, str):
+    if isinstance(input_filepath, str):  # pragma: no cover
         input_filepath = Path(input_filepath)
     with input_filepath.open() as f:
         original_lines = [line.rstrip("\n") for line in f.readlines()]

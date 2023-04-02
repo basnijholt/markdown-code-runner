@@ -31,7 +31,7 @@ addopts = """
     --cov=markdown_code_runner
     --cov-report term
     --cov-report html
-    --cov-fail-under=64
+    --cov-fail-under=100
 """
 
 [tool.coverage.report]
