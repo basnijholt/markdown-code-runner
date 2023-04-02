@@ -65,6 +65,13 @@ def is_marker(line: str, marker: str) -> bool:
     return line.startswith(MARKERS[marker])
 
 
+def _bold(text: str) -> str:
+    """Format a string as bold."""
+    bold = "\033[1m"
+    reset = "\033[0m"
+    return f"{bold}{text}{reset}"
+
+
 def process_markdown(  # noqa: PLR0912
     content: list[str],
     *,
@@ -93,7 +100,8 @@ def process_markdown(  # noqa: PLR0912
 
     for i, line in enumerate(content):
         if verbose:
-            print(f"line {i:4d}: {line}")
+            nr = _bold(f"line {i:4d}")
+            print(f"{nr}: {line}")
         if is_marker(line, "skip"):
             skip_code_block = True
         elif is_marker(line, "start_code"):

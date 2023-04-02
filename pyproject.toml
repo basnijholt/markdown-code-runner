@@ -8,7 +8,7 @@ description = "Automatically execute code blocks within a Markdown file and upda
 version = "0.1.0"
 authors = [{ name = "Bas Nijholt", email = "bas@nijho.lt" }]
 dependencies = []
-requires-python = ">=3.6"
+requires-python = ">=3.7"
 
 [project.readme]
 file = "README.md"
@@ -69,4 +69,4 @@ ignore = [
 max-complexity = 18
 
 [tool.mypy]
-python_version = "3.6"
+python_version = "3.7"
