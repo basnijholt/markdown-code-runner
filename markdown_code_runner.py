@@ -60,13 +60,24 @@ def execute_code_block(code: list[str]) -> list[str]:
     return f.getvalue().split("\n")
 
 
-def process_markdown(content: list[str]) -> list[str]:  # noqa: PLR0912
+def is_marker(line: str, marker: str) -> bool:
+    """Check if a line is a specific marker."""
+    return line.startswith(MARKERS[marker])
+
+
+def process_markdown(  # noqa: PLR0912
+    content: list[str],
+    *,
+    verbose: bool = False,
+) -> list[str]:
     """Executes code blocks in a list of Markdown-formatted strings and returns the modified list.
 
     Parameters
     ----------
     content
         A list of Markdown-formatted strings.
+    verbose
+        If True, print every line that is processed.
 
     Returns
     -------
@@ -80,12 +91,15 @@ def process_markdown(content: list[str]) -> list[str]:  # noqa: PLR0912
     in_code_block = in_output_block = skip_code_block = False
     output: list[str] | None = None
 
-    for line in content:
-        if MARKERS["skip"] in line:
+    for i, line in enumerate(content):
+        if verbose:
+            fmt_line = f"line {i:4d}: {line}"
+            print(fmt_line)
+        if is_marker(line, "skip"):
             skip_code_block = True
-        elif MARKERS["start_code"] in line:
+        elif is_marker(line, "start_code"):
             in_code_block = True
-        elif MARKERS["start_output"] in line:
+        elif is_marker(line, "start_output"):
             in_output_block = True
             if not skip_code_block:
                 assert isinstance(
@@ -96,14 +110,14 @@ def process_markdown(content: list[str]) -> list[str]:  # noqa: PLR0912
                 output = None
             else:
                 original_output.append(line)
-        elif MARKERS["end_output"] in line:
+        elif is_marker(line, "end_output"):
             in_output_block = False
             if skip_code_block:
                 new_lines.extend(original_output)
                 skip_code_block = False
             original_output = []
         elif in_code_block:
-            if MARKERS["end_code"] in line:
+            if is_marker(line, "end_code"):
                 in_code_block = False
                 if not skip_code_block:
                     output = execute_code_block(code)
@@ -132,7 +146,7 @@ def update_markdown_file(
         original_lines = [line.rstrip("\n") for line in f.readlines()]
     if debug:
         print(f"Processing input file: {input_filepath}")
-    new_lines = process_markdown(original_lines)
+    new_lines = process_markdown(original_lines, verbose=debug)
     updated_content = "\n".join(new_lines).rstrip() + "\n"
     if debug:
         print(f"Writing output to: {output_filepath}")
