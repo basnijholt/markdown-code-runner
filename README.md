@@ -305,6 +305,8 @@ df = pd.DataFrame(data, columns=["Column A", "Column B", "Column C"])
 print(df.to_markdown(index=False))
 ```
 
+Which is rendered as:
+
 <!-- START_CODE -->
 <!-- import pandas as pd -->
 <!-- import numpy as np -->
@@ -417,6 +419,8 @@ Output will appear here.
 <!-- END_OUTPUT -->
 ```
 
+Which is rendered as:
+
 <!-- START_CODE -->
 <!-- import pandas as pd -->
 <!-- csv_data = "Name,Age,Score\nAlice,30,90\nBob,25,85\nCharlie,22,95" -->
@@ -440,7 +444,21 @@ Output will appear here.
 You can use `markdown-code-runner` to make API calls and display the data as a list in your Markdown file.
 In this example, we'll use the `requests` library to fetch data from an API and display the results as a list.
 
+<!-- SKIP -->
 ```markdown
+<!-- START_CODE -->
+<!-- import requests -->
+<!-- response = requests.get("https://jsonplaceholder.typicode.com/todos?_limit=5") -->
+<!-- todos = response.json() -->
+<!-- for todo in todos: -->
+<!--     print(f"- {todo['title']} (User ID: {todo['userId']}, Completed: {todo['completed']})") -->
+<!-- END_CODE -->
+<!-- START_OUTPUT -->
+Output will appear here.
+<!-- END_OUTPUT -->
+```
+Which is rendered as:
+
 <!-- START_CODE -->
 <!-- import requests -->
 <!-- response = requests.get("https://jsonplaceholder.typicode.com/todos?_limit=5") -->
@@ -457,7 +475,6 @@ In this example, we'll use the `requests` library to fetch data from an API and 
 - laboriosam mollitia et enim quasi adipisci quia provident illum (User ID: 1, Completed: False)
 
 <!-- END_OUTPUT -->
-```
 
 These are just a few examples of how you can use Markdown Code Runner to enhance your Markdown documents with dynamic content. The possibilities are endless!
 
