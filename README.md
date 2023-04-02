@@ -210,12 +210,15 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install Python dependencies
+      - name: Install markdown-code-runner
         run: |
           python -m pip install --upgrade pip
-          # Install dependencies you're using in your README.md
-          pip install pandas tabulate pytest matplotlib
           pip install markdown-code-runner
+
+      # Install dependencies you're using in your README.md
+      - name: Install other Python dependencies
+        run: |
+          pip install pandas tabulate pytest matplotlib
 
       - name: Run update-readme.py
         run: markdown-code-runner README.md
