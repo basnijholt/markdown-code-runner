@@ -21,7 +21,7 @@ Homepage = "https://github.com/basnijholt/markdown-code-runner"
 test = ["pytest", "pre-commit", "coverage", "pytest-cov"]
 
 [project.scripts]
-markdown-code-runner = "markdown_code_runner:update_markdown_file"
+markdown-code-runner = "markdown_code_runner:main"
 
 [tool.setuptools]
 py-modules = ["markdown_code_runner"]
