@@ -9,17 +9,15 @@ The package is hosted on GitHub: [https://github.com/basnijholt/markdown-code-ru
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [:rocket: Markdown Code Runner](#rocket-markdown-code-runner)
-  - [:books: Table of Contents](#books-table-of-contents)
-  - [:question: Problem Statement](#question-problem-statement)
-  - [:computer: Installation](#computer-installation)
-  - [:rocket: Quick Start](#rocket-quick-start)
-  - [Usage](#usage)
-  - [:book: Examples](#book-examples)
-    - [:star: Example 1: Simple code block](#star-example-1-simple-code-block)
-    - [:star: Example 2: Multiple code blocks](#star-example-2-multiple-code-blocks)
-  - [:page\_with\_curl: License](#page_with_curl-license)
-  - [:handshake: Contributing](#handshake-contributing)
+- [:question: Problem Statement](#question-problem-statement)
+- [:computer: Installation](#computer-installation)
+- [:rocket: Quick Start](#rocket-quick-start)
+- [Usage](#usage)
+- [:book: Examples](#book-examples)
+  - [:star: Example 1: Simple code block](#star-example-1-simple-code-block)
+  - [:star: Example 2: Multiple code blocks](#star-example-2-multiple-code-blocks)
+- [:page_with_curl: License](#page_with_curl-license)
+- [:handshake: Contributing](#handshake-contributing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
