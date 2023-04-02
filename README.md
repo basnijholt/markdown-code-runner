@@ -168,7 +168,7 @@ Hello again!
 
 Markdown Code Runner can be used for various purposes, such as creating Markdown tables, generating visualizations, and showcasing code examples with live outputs. Here are some usage ideas to get you started:
 
-### :bar_chart: Generating Markdown Tables
+### :bar_chart: Idea 1: Generating Markdown Tables
 
 Use the `pandas` library to create a Markdown table from a DataFrame. The following example demonstrates how to create a table with random data:
 
@@ -210,7 +210,7 @@ print(df.to_markdown(index=False))
 
 <!-- END_OUTPUT -->
 
-### :art: Generating Visualizations
+### :art: Idea 2: Generating Visualizations
 
 Create a visualization using the `matplotlib` library and save it as an image. Then, reference the image in your Markdown file. The following example demonstrates how to create a bar chart:
 
@@ -280,7 +280,7 @@ print(img_html)
 
 <!-- END_OUTPUT -->
 
-### :star: Example 3: Generating a table from CSV data
+### :star: Idea 3: Generating a table from CSV data
 
 Suppose you have a CSV file containing data that you want to display as a table in your Markdown file.
 You can use `pandas` to read the CSV file, convert it to a DataFrame, and then output it as a Markdown table.
@@ -322,7 +322,7 @@ You can use `pandas` to read the CSV file, convert it to a DataFrame, and then o
 
 <!-- END_OUTPUT -->
 
-### :star: Example 4: Displaying API data as a list
+### :star: Idea 4: Displaying API data as a list
 
 You can use `markdown-code-runner` to make API calls and display the data as a list in your Markdown file.
 In this example, we'll use the `requests` library to fetch data from an API and display the results as a list.
