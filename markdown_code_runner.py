@@ -41,7 +41,8 @@ MARKERS = {
 def remove_md_comment(commented_text: str) -> str:
     """Remove Markdown comment tags from a string."""
     if not (commented_text.startswith("<!-- ") and commented_text.endswith(" -->")):
-        raise ValueError("Invalid Markdown comment format")
+        msg = "Invalid Markdown comment format"
+        raise ValueError(msg)
     return commented_text[5:-4]
 
 
@@ -68,15 +69,16 @@ def process_markdown(content: list[str]) -> list[str]:
     """
     assert isinstance(content, list), "Input must be a list"
     new_lines = []
-    code = []
+    code: list[str] = []
     in_code_block = in_output_block = False
-    output = None
+    output: list[str] | None = None
 
     for line in content:
         if MARKERS["start_code"] in line:
             in_code_block = True
         elif MARKERS["start_output"] in line:
             in_output_block = True
+            assert isinstance(output, list), "Output must be a list"
             new_lines.extend([line, MARKERS["warning"], *output])
             output = None
         elif MARKERS["end_output"] in line:
