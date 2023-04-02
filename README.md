@@ -170,7 +170,7 @@ Hello again!
 
 Markdown Code Runner can be used for various purposes, such as creating Markdown tables, generating visualizations, and showcasing code examples with live outputs. Here are some usage ideas to get you started:
 
-## :gear: Idea 1: Continuous Integration with GitHub Actions
+### :gear: Idea 1: Continuous Integration with GitHub Actions
 
 You can use `markdown-code-runner` to automatically update your Markdown files in a CI environment.
 The following example demonstrates how to configure a GitHub Actions workflow that updates your `README.md` whenever changes are pushed to the `main` branch.
@@ -244,7 +244,7 @@ jobs:
 
 For more information on configuring GitHub Actions, check out the [official documentation](https://docs.github.com/en/actions/learn-github-actions/introduction-to-github-actions).
 
-## :computer: Idea 1: Show command-line output
+### :computer: Idea 1: Show command-line output
 
 Use `markdown-code-runner` to display the output of a command-line program. For example, the following Markdown file shows the helper options of this package:
 <!-- SKIP -->
