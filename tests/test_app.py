@@ -24,7 +24,7 @@ def test_process_markdown() -> None:
 
     def assert_process(input_lines: list[str], expected_output: list[str]) -> None:
         output = process_markdown(input_lines)
-        assert output == expected_output, f"Expected {expected_output}, got {output}"
+        assert output == expected_output, f"Expected\n{expected_output}\ngot\n{output}"
 
     # Test case 1: Single code block
     input_lines = [
@@ -98,6 +98,60 @@ def test_process_markdown() -> None:
     expected_output = [
         "Some text",
         "More text",
+    ]
+    assert_process(input_lines, expected_output)
+
+    # Test case 4: Single code block with skip marker
+    input_lines = [
+        "Some text",
+        MARKERS["skip"],
+        MARKERS["start_code"],
+        md_comment("print('Hello, world!')"),
+        MARKERS["end_code"],
+        MARKERS["start_output"],
+        "This content will be replaced",
+        MARKERS["end_output"],
+        "More text",
+    ]
+    expected_output = input_lines
+    assert_process(input_lines, expected_output)
+
+    # Test case 5: Skip marker at first code block, execute second code block
+    input_lines = [
+        "Some text",
+        MARKERS["skip"],
+        MARKERS["start_code"],
+        md_comment("print('Hello, world!')"),
+        MARKERS["end_code"],
+        MARKERS["start_output"],
+        "This content will be replaced",
+        MARKERS["end_output"],
+        "More text",
+        MARKERS["start_code"],
+        md_comment("print('Hello again!')"),
+        MARKERS["end_code"],
+        MARKERS["start_output"],
+        "This content will also be replaced",
+        MARKERS["end_output"],
+    ]
+    expected_output = [
+        "Some text",
+        MARKERS["skip"],
+        MARKERS["start_code"],
+        md_comment("print('Hello, world!')"),
+        MARKERS["end_code"],
+        MARKERS["start_output"],
+        "This content will be replaced",
+        MARKERS["end_output"],
+        "More text",
+        MARKERS["start_code"],
+        md_comment("print('Hello again!')"),
+        MARKERS["end_code"],
+        MARKERS["start_output"],
+        MARKERS["warning"],
+        "Hello again!",
+        "",
+        MARKERS["end_output"],
     ]
     assert_process(input_lines, expected_output)
 

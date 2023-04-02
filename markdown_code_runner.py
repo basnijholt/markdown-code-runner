@@ -40,6 +40,7 @@ MARKERS = {
     "end_code": md_comment("END_CODE"),
     "start_output": md_comment("START_OUTPUT"),
     "end_output": md_comment("END_OUTPUT"),
+    "skip": md_comment("SKIP"),
 }
 
 
@@ -59,7 +60,7 @@ def execute_code_block(code: list[str]) -> list[str]:
     return f.getvalue().split("\n")
 
 
-def process_markdown(content: list[str]) -> list[str]:
+def process_markdown(content: list[str]) -> list[str]:  # noqa: PLR0912
     """Executes code blocks in a list of Markdown-formatted strings and returns the modified list.
 
     Parameters
@@ -75,29 +76,42 @@ def process_markdown(content: list[str]) -> list[str]:
     assert isinstance(content, list), "Input must be a list"
     new_lines = []
     code: list[str] = []
-    in_code_block = in_output_block = False
+    original_output: list[str] = []
+    in_code_block = in_output_block = skip_code_block = False
     output: list[str] | None = None
 
     for line in content:
-        if MARKERS["start_code"] in line:
+        if MARKERS["skip"] in line:
+            skip_code_block = True
+        elif MARKERS["start_code"] in line:
             in_code_block = True
         elif MARKERS["start_output"] in line:
             in_output_block = True
-            assert isinstance(
-                output,
-                list,
-            ), f"Output must be a list, not {type(output)}"
-            new_lines.extend([line, MARKERS["warning"], *output])
-            output = None
+            if not skip_code_block:
+                assert isinstance(
+                    output,
+                    list,
+                ), f"Output must be a list, not {type(output)}"
+                new_lines.extend([line, MARKERS["warning"], *output])
+                output = None
+            else:
+                original_output.append(line)
         elif MARKERS["end_output"] in line:
             in_output_block = False
+            if skip_code_block:
+                new_lines.extend(original_output)
+                skip_code_block = False
+            original_output = []
         elif in_code_block:
             if MARKERS["end_code"] in line:
                 in_code_block = False
-                output = execute_code_block(code)
+                if not skip_code_block:
+                    output = execute_code_block(code)
                 code = []
             else:
                 code.append(remove_md_comment(line))
+        elif in_output_block:
+            original_output.append(line)
 
         if not in_output_block:
             new_lines.append(line)
