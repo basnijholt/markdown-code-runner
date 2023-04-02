@@ -244,7 +244,7 @@ img_html = f'<img src="data:image/png;base64,{quote(data)}" alt="Sample Line Plo
 
 print(img_html)
 ```
-
+<!-- SKIP -->
 <!-- START_CODE -->
 <!-- import matplotlib.pyplot as plt -->
 <!-- import io -->
