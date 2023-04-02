@@ -252,30 +252,30 @@ print(img_html)
 <!-- import io -->
 <!-- import base64 -->
 <!-- from urllib.parse import quote -->
-
+<!--  -->
 <!-- # Example data for the plot -->
 <!-- x = [1, 2, 3, 4, 5] -->
 <!-- y = [2, 4, 6, 8, 10] -->
-
+<!--  -->
 <!-- # Create a simple line plot -->
 <!-- plt.plot(x, y) -->
 <!-- plt.xlabel("X-axis") -->
 <!-- plt.ylabel("Y-axis") -->
 <!-- plt.title("Sample Line Plot") -->
-
+<!--  -->
 <!-- # Save the plot to a BytesIO buffer -->
 <!-- buf = io.BytesIO() -->
 <!-- plt.savefig(buf, format='png', dpi=30) -->
 <!-- plt.close() -->
-
+<!--  -->
 <!-- # Encode the buffer as a base64 string -->
 <!-- data = base64.b64encode(buf.getvalue()).decode('utf-8') -->
-
+<!--  -->
 <!-- # Create an inline HTML img tag with the base64 string -->
 <!-- img_html = f'<img src="data:image/png;base64,{quote(data)}" alt="Sample Line Plot"/>' -->
-
+<!--  -->
 <!-- print(img_html) -->
-
+<!--  -->
 <!-- END_CODE -->
 <!-- START_OUTPUT -->
 

@@ -93,8 +93,7 @@ def process_markdown(  # noqa: PLR0912
 
     for i, line in enumerate(content):
         if verbose:
-            fmt_line = f"line {i:4d}: {line}"
-            print(fmt_line)
+            print(f"line {i:4d}: {line}")
         if is_marker(line, "skip"):
             skip_code_block = True
         elif is_marker(line, "start_code"):
