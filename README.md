@@ -1,35 +1,36 @@
-# 🚀 Markdown Code Runner
+# :rocket: Markdown Code Runner
 
 `markdown-code-runner` is a Python package that automatically executes code blocks within a Markdown file and updates the output in-place. This package is particularly useful for maintaining Markdown files with embedded code snippets, ensuring that the output displayed is up-to-date and accurate.
 
 The package is hosted on GitHub: [https://github.com/basnijholt/markdown-code-runner](https://github.com/basnijholt/markdown-code-runner)
 
-## 📚 Table of Contents
 ## :books: Table of Contents
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-- [❓ Problem Statement](#-problem-statement)
-- [💻 Installation](#-installation)
-- [🚀 Quick Start](#-quick-start)
-- [Usage](#usage)
-- [📖 Examples](#-examples)
-  - [🌟 Example 1: Simple code block](#-example-1-simple-code-block)
-  - [🌟 Example 2: Multiple code blocks](#-example-2-multiple-code-blocks)
-- [📄 License](#-license)
-- [🤝 Contributing](#-contributing)
+- [:rocket: Markdown Code Runner](#rocket-markdown-code-runner)
+  - [:books: Table of Contents](#books-table-of-contents)
+  - [:question: Problem Statement](#question-problem-statement)
+  - [:computer: Installation](#computer-installation)
+  - [:rocket: Quick Start](#rocket-quick-start)
+  - [Usage](#usage)
+  - [:book: Examples](#book-examples)
+    - [:star: Example 1: Simple code block](#star-example-1-simple-code-block)
+    - [:star: Example 2: Multiple code blocks](#star-example-2-multiple-code-blocks)
+  - [:page\_with\_curl: License](#page_with_curl-license)
+  - [:handshake: Contributing](#handshake-contributing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
-## ❓ Problem Statement
+## :question: Problem Statement
 
 When creating Markdown files with code examples, it's essential to keep the output of these code snippets accurate and up-to-date. Manually updating the output can be time-consuming and error-prone, especially when working with large files or multiple collaborators.
 
 `markdown-code-runner` solves this problem by automatically executing the code blocks within a Markdown file and updating the output in-place. This ensures that the displayed output is always in sync with the code.
 
-## 💻 Installation
+## :computer: Installation
 
 Install `markdown-code-runner` via pip:
 
@@ -37,7 +38,7 @@ Install `markdown-code-runner` via pip:
 pip install markdown-code-runner
 ```
 
-## 🚀 Quick Start
+## :rocket: Quick Start
 
 To get started with `markdown-code-runner`, follow these steps:
 
@@ -77,11 +78,11 @@ from pathlib import Path
 update_markdown_file(Path("path/to/your/markdown_file.md"))
 ```
 
-## 📖 Examples
+## :book: Examples
 
 Here are a few examples demonstrating the usage of `markdown-code-runner`:
 
-### 🌟 Example 1: Simple code block
+### :star: Example 1: Simple code block
 
 ```markdown
 This is an example of a simple code block:
@@ -108,7 +109,7 @@ Hello, world!
 <!-- END_OUTPUT -->
 ```
 
-### 🌟 Example 2: Multiple code blocks
+### :star: Example 2: Multiple code blocks
 
 ```markdown
 Here are two code blocks:
@@ -154,11 +155,11 @@ Hello again!
 ```
 
 
-## 📄 License
+## :page_with_curl: License
 
 `markdown-code-runner` is released under the [MIT License](https://opensource.org/licenses/MIT). Please include the LICENSE file when using this package in your project, and cite the original source.
 
-## 🤝 Contributing
+## :handshake: Contributing
 
 Contributions are welcome! To contribute, please follow these steps:
 
