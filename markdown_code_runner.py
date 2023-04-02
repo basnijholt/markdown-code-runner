@@ -47,7 +47,7 @@ MARKERS = {
 def remove_md_comment(commented_text: str) -> str:
     """Remove Markdown comment tags from a string."""
     if not (commented_text.startswith("<!-- ") and commented_text.endswith(" -->")):
-        msg = "Invalid Markdown comment format"
+        msg = f"Invalid Markdown comment format: {commented_text}"
         raise ValueError(msg)
     return commented_text[5:-4]
 
@@ -91,7 +91,7 @@ def process_markdown(content: list[str]) -> list[str]:  # noqa: PLR0912
                 assert isinstance(
                     output,
                     list,
-                ), f"Output must be a list, not {type(output)}"
+                ), f"Output must be a list, not {type(output)}, line: {line}"
                 new_lines.extend([line, MARKERS["warning"], *output])
                 output = None
             else:
