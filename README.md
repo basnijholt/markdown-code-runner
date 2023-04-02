@@ -151,7 +151,6 @@ First code block:
 <!-- END_CODE -->
 <!-- START_OUTPUT -->
 <!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
-
 Hello, world!
 
 <!-- END_OUTPUT -->
@@ -163,7 +162,6 @@ Second code block:
 <!-- END_CODE -->
 <!-- START_OUTPUT -->
 <!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
-
 Hello again!
 
 <!-- END_OUTPUT -->
@@ -205,14 +203,13 @@ print(df.to_markdown(index=False))
 <!-- END_CODE -->
 <!-- START_OUTPUT -->
 <!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
-
-| Column A | Column B | Column C |
-| --- | --- | --- |
-| 52 | 93 | 15 |
-| 72 | 61 | 21 |
-| 83 | 87 | 75 |
-| 75 | 88 | 24 |
-| 3 | 22 | 53 |
+|   Column A |   Column B |   Column C |
+|-----------:|-----------:|-----------:|
+|         52 |         93 |         15 |
+|         72 |         61 |         21 |
+|         83 |         87 |         75 |
+|         75 |         88 |        100 |
+|         24 |          3 |         22 |
 
 <!-- END_OUTPUT -->
 
@@ -293,12 +290,12 @@ You can use `pandas` to read the CSV file, convert it to a DataFrame, and then o
 <!-- SKIP -->
 ```markdown
 <!-- START_CODE -->
-<!-- import pandas as pd
-csv_data = "Name,Age,Score\nAlice,30,90\nBob,25,85\nCharlie,22,95"
-with open("sample_data.csv", "w") as f:
-    f.write(csv_data)
-df = pd.read_csv("sample_data.csv")
-print(df.to_markdown(index=False)) -->
+<!-- import pandas as pd -->
+<!-- csv_data = "Name,Age,Score\nAlice,30,90\nBob,25,85\nCharlie,22,95" -->
+<!-- with open("sample_data.csv", "w") as f: -->
+<!--     f.write(csv_data) -->
+<!-- df = pd.read_csv("sample_data.csv") -->
+<!-- print(df.to_markdown(index=False)) --> -->
 <!-- END_CODE -->
 <!-- START_OUTPUT -->
 <!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
@@ -311,34 +308,35 @@ print(df.to_markdown(index=False)) -->
 ```
 
 <!-- START_CODE -->
-<!-- import pandas as pd
-csv_data = "Name,Age,Score\nAlice,30,90\nBob,25,85\nCharlie,22,95"
-with open("sample_data.csv", "w") as f:
-    f.write(csv_data)
-df = pd.read_csv("sample_data.csv")
-print(df.to_markdown(index=False)) -->
+<!-- import pandas as pd -->
+<!-- csv_data = "Name,Age,Score\nAlice,30,90\nBob,25,85\nCharlie,22,95" -->
+<!-- with open("sample_data.csv", "w") as f: -->
+<!--     f.write(csv_data) -->
+<!-- df = pd.read_csv("sample_data.csv") -->
+<!-- print(df.to_markdown(index=False)) -->
 <!-- END_CODE -->
 <!-- START_OUTPUT -->
 <!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
-| Name     |   Age |   Score |
-|:---------|------:|--------:|
-| Alice    |    30 |      90 |
-| Bob      |    25 |      85 |
-| Charlie  |    22 |      95 |
+| Name    |   Age |   Score |
+|:--------|------:|--------:|
+| Alice   |    30 |      90 |
+| Bob     |    25 |      85 |
+| Charlie |    22 |      95 |
+
 <!-- END_OUTPUT -->
 
 ### :star: Example 4: Displaying API data as a list
 
 You can use `markdown-code-runner` to make API calls and display the data as a list in your Markdown file.
 In this example, we'll use the `requests` library to fetch data from an API and display the results as a list.
-
+<!-- SKIP -->
 ```markdown
 <!-- START_CODE -->
-<!-- import requests
-response = requests.get("https://jsonplaceholder.typicode.com/todos?_limit=5")
-todos = response.json()
-for todo in todos:
-    print(f"- {todo['title']} (User ID: {todo['userId']}, Completed: {todo['completed']})") -->
+<!-- import requests -->
+<!-- response = requests.get("https://jsonplaceholder.typicode.com/todos?_limit=5") -->
+<!-- todos = response.json() -->
+<!-- for todo in todos: -->
+<!--     print(f"- {todo['title']} (User ID: {todo['userId']}, Completed: {todo['completed']})") -->
 <!-- END_CODE -->
 <!-- START_OUTPUT -->
 <!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
@@ -350,9 +348,7 @@ for todo in todos:
 <!-- END_OUTPUT -->
 ```
 
-
 These are just a few examples of how you can use Markdown Code Runner to enhance your Markdown documents with dynamic content. The possibilities are endless!
-
 
 ## :page_with_curl: License
 
