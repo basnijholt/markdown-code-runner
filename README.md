@@ -96,7 +96,6 @@ This content will be replaced by the output of the code block above.
 ```
 
 After running `markdown-code-runner`:
-<!-- SKIP -->
 ```markdown
 This is an example of a simple code block:
 
@@ -106,6 +105,7 @@ This is an example of a simple code block:
 <!-- START_OUTPUT -->
 <!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
 Hello, world!
+
 <!-- END_OUTPUT -->
 ```
 
