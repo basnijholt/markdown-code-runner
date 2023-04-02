@@ -137,7 +137,11 @@ Here are two code blocks:
 
 First code block:
 
-<!-- START_CODE --> <!-- print('Hello, world!') --> <!-- END_CODE --> <!-- START_OUTPUT --> <!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
+<!-- START_CODE -->
+<!-- print('Hello, world!') -->
+<!-- END_CODE -->
+<!-- START_OUTPUT -->
+<!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
 
 Hello, world!
 
@@ -145,7 +149,11 @@ Hello, world!
 
 Second code block:
 
-<!-- START_CODE --> <!-- print('Hello again!') --> <!-- END_CODE --> <!-- START_OUTPUT --> <!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
+<!-- START_CODE -->
+<!-- print('Hello again!') -->
+<!-- END_CODE -->
+<!-- START_OUTPUT -->
+<!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
 
 Hello again!
 
