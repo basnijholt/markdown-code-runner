@@ -5,18 +5,13 @@
 The package is hosted on GitHub: [https://github.com/basnijholt/markdown-code-runner](https://github.com/basnijholt/markdown-code-runner)
 
 ## 📚 Table of Contents
+## :books: Table of Contents
 
-- [🚀 Markdown Code Runner](#-markdown-code-runner)
-  - [📚 Table of Contents](#-table-of-contents)
-  - [❓ Problem Statement](#-problem-statement)
-  - [💻 Installation](#-installation)
-  - [🚀 Quick Start](#-quick-start)
-  - [Usage](#usage)
-  - [📖 Examples](#-examples)
-    - [🌟 Example 1: Simple code block](#-example-1-simple-code-block)
-    - [🌟 Example 2: Multiple code blocks](#-example-2-multiple-code-blocks)
-  - [📄 License](#-license)
-  - [🤝 Contributing](#-contributing)
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 ## ❓ Problem Statement
 
