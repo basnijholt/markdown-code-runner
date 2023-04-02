@@ -439,7 +439,7 @@ Output will appear here.
 
 You can use `markdown-code-runner` to make API calls and display the data as a list in your Markdown file.
 In this example, we'll use the `requests` library to fetch data from an API and display the results as a list.
-<!-- SKIP -->
+
 ```markdown
 <!-- START_CODE -->
 <!-- import requests -->
@@ -455,6 +455,7 @@ In this example, we'll use the `requests` library to fetch data from an API and 
 - fugiat veniam minus (User ID: 1, Completed: False)
 - et porro tempora (User ID: 1, Completed: True)
 - laboriosam mollitia et enim quasi adipisci quia provident illum (User ID: 1, Completed: False)
+
 <!-- END_OUTPUT -->
 ```
 
