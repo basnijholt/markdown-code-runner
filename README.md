@@ -413,12 +413,7 @@ You can use `pandas` to read the CSV file, convert it to a DataFrame, and then o
 <!-- print(df.to_markdown(index=False)) --> -->
 <!-- END_CODE -->
 <!-- START_OUTPUT -->
-<!-- THIS CONTENT IS AUTOMATICALLY GENERATED -->
-| Name     |   Age |   Score |
-|:---------|------:|--------:|
-| Alice    |    30 |      90 |
-| Bob      |    25 |      85 |
-| Charlie  |    22 |      95 |
+Output will appear here.
 <!-- END_OUTPUT -->
 ```
 
