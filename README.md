@@ -218,7 +218,7 @@ jobs:
       # Install dependencies you're using in your README.md
       - name: Install other Python dependencies
         run: |
-          pip install pandas tabulate pytest matplotlib
+          pip install pandas tabulate pytest matplotlib requests
 
       - name: Run update-readme.py
         run: markdown-code-runner README.md
