@@ -252,7 +252,7 @@ jobs:
 
 For more information on configuring GitHub Actions, check out the [official documentation](https://docs.github.com/en/actions/learn-github-actions/introduction-to-github-actions).
 
-### :computer: Idea 1: Show command-line output
+### :computer: Idea 2: Show command-line output
 
 Use `markdown-code-runner` to display the output of a command-line program. For example, the following Markdown file shows the helper options of this package:
 <!-- SKIP -->
@@ -294,7 +294,7 @@ options:
 
 <!-- END_OUTPUT -->
 
-### :bar_chart: Idea 2: Generating Markdown Tables
+### :bar_chart: Idea 3: Generating Markdown Tables
 
 Use the `pandas` library to create a Markdown table from a DataFrame. The following example demonstrates how to create a table with random data:
 
@@ -338,7 +338,7 @@ Which is rendered as:
 
 <!-- END_OUTPUT -->
 
-### :art: Idea 3: Generating Visualizations
+### :art: Idea 4: Generating Visualizations
 
 Create a visualization using the `matplotlib` library and save it as an image. Then, reference the image in your Markdown file. The following example demonstrates how to create a bar chart:
 
@@ -408,7 +408,7 @@ print(img_html)
 
 <!-- END_OUTPUT -->
 
-### :star: Idea 4: Generating a table from CSV data
+### :star: Idea 5: Generating a table from CSV data
 
 Suppose you have a CSV file containing data that you want to display as a table in your Markdown file.
 You can use `pandas` to read the CSV file, convert it to a DataFrame, and then output it as a Markdown table.
