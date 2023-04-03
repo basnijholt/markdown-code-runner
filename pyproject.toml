@@ -1,14 +1,14 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "markdown-code-runner"
 description = "Automatically execute code blocks within a Markdown file and update the output in-place"
-version = "0.1.0"
 authors = [{ name = "Bas Nijholt", email = "bas@nijho.lt" }]
 dependencies = []
 requires-python = ">=3.7"
+dynamic = ["version"]
 
 [project.readme]
 file = "README.md"
@@ -25,6 +25,8 @@ markdown-code-runner = "markdown_code_runner:main"
 
 [tool.setuptools]
 py-modules = ["markdown_code_runner"]
+
+[tool.setuptools_scm]
 
 [tool.pytest.ini_options]
 addopts = """

@@ -28,6 +28,10 @@ import contextlib
 import io
 from pathlib import Path
 
+import pkg_resources
+
+__version__ = pkg_resources.get_distribution("markdown-code-runner").version
+
 
 def md_comment(text: str) -> str:
     """Format a string as a Markdown comment."""
