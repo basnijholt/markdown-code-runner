@@ -269,7 +269,9 @@ For more information on configuring GitHub Actions, check out the [official docu
 
 ### :computer: Idea 2: Show command-line output
 
-Use `markdown-code-runner` to display the output of a command-line program. For example, the following Markdown file shows the helper options of this package:
+Use `markdown-code-runner` to display the output of a command-line program. For example, the following Markdown file shows the helper options of this package.
+
+Using a hidden code block:
 <!-- SKIP -->
 ```markdown
 <!-- START_CODE -->
@@ -344,7 +346,7 @@ Which is rendered as:
 
 ### :art: Idea 4: Generating Visualizations
 
-Create a visualization using the `matplotlib` library and save it as an image. Then, reference the image in your Markdown file. The following example demonstrates how to create a bar chart:
+Create a visualization using the `matplotlib` library and save it as an image. Then, reference the image in your Markdown file. The following example demonstrates how to create a bar chart.
 
 Using a triple-backtick code block:
 
