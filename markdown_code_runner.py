@@ -35,6 +35,7 @@ import contextlib
 import io
 import re
 from pathlib import Path
+from typing import Any
 
 import pkg_resources
 
@@ -66,14 +67,21 @@ def remove_md_comment(commented_text: str) -> str:
     return commented_text[5:-4]
 
 
-def execute_code_block(code: list[str], *, verbose: bool = False) -> list[str]:
+def execute_code_block(
+    code: list[str],
+    context: dict[str, Any] | None = None,
+    *,
+    verbose: bool = False,
+) -> list[str]:
     """Execute a code block and return its output as a list of strings."""
+    if context is None:
+        context = {}
     f = io.StringIO()
     full_code = "\n".join(code)
     if verbose:
         print(f"Executing code block:\n{full_code}\n")
     with contextlib.redirect_stdout(f):
-        exec(full_code)  # noqa: S102
+        exec(full_code, context)  # noqa: S102
     return f.getvalue().split("\n")
 
 
@@ -109,6 +117,7 @@ def process_markdown(  # noqa: PLR0912, PLR0915
         A modified list of Markdown-formatted strings with code block output inserted.
     """
     assert isinstance(content, list), "Input must be a list"
+    context: dict[str, Any] = {}
     new_lines = []
     code: list[str] = []
     original_output: list[str] = []
@@ -116,10 +125,11 @@ def process_markdown(  # noqa: PLR0912, PLR0915
     output: list[str] | None = None
 
     triple_backtick_pattern = re.compile(r"^```python markdown-code-runner")
+    # add empty line to process last code block (if at end of file)
     content = [
         *content,
         "",
-    ]  # add empty line to process last code block (if at end of file)
+    ]
     for i, line in enumerate(content):
         if verbose:
             nr = _bold(f"line {i:4d}")
@@ -150,7 +160,7 @@ def process_markdown(  # noqa: PLR0912, PLR0915
             if is_marker(line, "end_code"):
                 in_code_block = False
                 if not skip_code_block:
-                    output = execute_code_block(code, verbose=verbose)
+                    output = execute_code_block(code, context, verbose=verbose)
                 code = []
             else:
                 code.append(remove_md_comment(line))
@@ -160,7 +170,7 @@ def process_markdown(  # noqa: PLR0912, PLR0915
             if line.strip() == "```":
                 in_backtick_code_block = False
                 if not skip_code_block:
-                    output = execute_code_block(code, verbose=verbose)
+                    output = execute_code_block(code, context, verbose=verbose)
                 code = []
             else:
                 code.append(line)
@@ -221,6 +231,12 @@ def main() -> None:
         "--debug",
         action="store_true",
         help="Enable debugging mode (default: False)",
+    )
+    parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
 
     args = parser.parse_args()
