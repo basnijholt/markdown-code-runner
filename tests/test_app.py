@@ -453,3 +453,81 @@ def test_mix_md_and_triple_backticks() -> None:
         "More text",
     ]
     assert_process(input_lines, expected_output)
+
+
+def test_preserve_variables_between_code_blocks() -> None:
+    """Test that variables are preserved between code blocks."""
+    input_lines = [
+        "Some text",
+        "```python markdown-code-runner",
+        "a = 1",
+        "print(a)",
+        "```",
+        MARKERS["start_output"],
+        "This content will be replaced",
+        MARKERS["end_output"],
+        "More text",
+        "```python markdown-code-runner",
+        "print(a)",
+        "```",
+        MARKERS["start_output"],
+        "This content will also be replaced",
+        MARKERS["end_output"],
+    ]
+    expected_output = [
+        "Some text",
+        "```python markdown-code-runner",
+        "a = 1",
+        "print(a)",
+        "```",
+        MARKERS["start_output"],
+        MARKERS["warning"],
+        "1",
+        "",
+        MARKERS["end_output"],
+        "More text",
+        "```python markdown-code-runner",
+        "print(a)",
+        "```",
+        MARKERS["start_output"],
+        MARKERS["warning"],
+        "1",
+        "",
+        MARKERS["end_output"],
+    ]
+    assert_process(input_lines, expected_output)
+
+
+def test_two_code_blocks_but_first_without_output() -> None:
+    """Test that two code blocks are executed even if the first one has no output block."""
+    input_lines = [
+        "Some text",
+        "```python markdown-code-runner",
+        "a = 1",
+        "print('this will not be printed')",
+        "```",
+        "No output block here",
+        "```python markdown-code-runner",
+        "print(a)",
+        "```",
+        MARKERS["start_output"],
+        "This content will also be replaced",
+        MARKERS["end_output"],
+    ]
+    expected_output = [
+        "Some text",
+        "```python markdown-code-runner",
+        "a = 1",
+        "print('this will not be printed')",
+        "```",
+        "No output block here",
+        "```python markdown-code-runner",
+        "print(a)",
+        "```",
+        MARKERS["start_output"],
+        MARKERS["warning"],
+        "1",
+        "",
+        MARKERS["end_output"],
+    ]
+    assert_process(input_lines, expected_output)
