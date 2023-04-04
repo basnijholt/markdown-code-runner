@@ -19,19 +19,21 @@ from markdown_code_runner import (
 TEST_FOLDER = Path(__file__).parent
 
 
+def assert_process(input_lines: list[str], expected_output: list[str]) -> None:
+    """Assert that the process_markdown function returns the expected output."""
+    output = process_markdown(input_lines, verbose=True)
+    assert output == expected_output, f"Expected\n{expected_output}\ngot\n{output}"
+
+
 def test_process_markdown() -> None:
     """Test the process_markdown function."""
-
-    def assert_process(input_lines: list[str], expected_output: list[str]) -> None:
-        output = process_markdown(input_lines)
-        assert output == expected_output, f"Expected\n{expected_output}\ngot\n{output}"
-
     # Test case 1: Single code block
     input_lines = [
         "Some text",
         MARKERS["start_code"],
         md_comment("print('Hello, world!')"),
         MARKERS["end_code"],
+        "Which will procure the following output:",
         MARKERS["start_output"],
         "This content will be replaced",
         MARKERS["end_output"],
@@ -42,6 +44,7 @@ def test_process_markdown() -> None:
         MARKERS["start_code"],
         md_comment("print('Hello, world!')"),
         MARKERS["end_code"],
+        "Which will procure the following output:",
         MARKERS["start_output"],
         MARKERS["warning"],
         "Hello, world!",
@@ -235,3 +238,218 @@ def test_main_debug_mode(capfd: pytest.CaptureFixture, tmp_path: Path) -> None:
         assert f"Processing input file: {test_filepath}" in captured.out
         assert f"Writing output to: {output_filepath}" in captured.out
         assert "Done!" in captured.out
+
+
+def test_triple_backticks() -> None:
+    """Test the triple-backticks code block."""
+    # Test case 1: Single code block
+    input_lines = [
+        "Some text",
+        "```python markdown-code-runner",
+        "print('Hello, world!')",
+        "```",
+        MARKERS["start_output"],
+        "This content will be replaced",
+        MARKERS["end_output"],
+        "More text",
+    ]
+    expected_output = [
+        "Some text",
+        "```python markdown-code-runner",
+        "print('Hello, world!')",
+        "```",
+        MARKERS["start_output"],
+        MARKERS["warning"],
+        "Hello, world!",
+        "",
+        MARKERS["end_output"],
+        "More text",
+    ]
+    assert_process(input_lines, expected_output)
+
+    # Test case 2: Two code blocks
+    input_lines = [
+        "Some text",
+        "```python markdown-code-runner",
+        "print('Hello, world!')",
+        "```",
+        MARKERS["start_output"],
+        "This content will be replaced",
+        MARKERS["end_output"],
+        "More text",
+        "```python markdown-code-runner",
+        "print('Hello again!')",
+        "```",
+        MARKERS["start_output"],
+        "This content will also be replaced",
+        MARKERS["end_output"],
+    ]
+    expected_output = [
+        "Some text",
+        "```python markdown-code-runner",
+        "print('Hello, world!')",
+        "```",
+        MARKERS["start_output"],
+        MARKERS["warning"],
+        "Hello, world!",
+        "",
+        MARKERS["end_output"],
+        "More text",
+        "```python markdown-code-runner",
+        "print('Hello again!')",
+        "```",
+        MARKERS["start_output"],
+        MARKERS["warning"],
+        "Hello again!",
+        "",
+        MARKERS["end_output"],
+    ]
+    assert_process(input_lines, expected_output)
+
+    # Test case 3: No code blocks
+    input_lines = [
+        "Some text",
+        "More text",
+    ]
+    expected_output = [
+        "Some text",
+        "More text",
+    ]
+    assert_process(input_lines, expected_output)
+
+    # Test case 4: Single code block with skip marker
+    input_lines = [
+        "Some text",
+        MARKERS["skip"],
+        "```python markdown-code-runner",
+        "print('Hello, world!')",
+        "```",
+        MARKERS["start_output"],
+        "This content will be replaced",
+        MARKERS["end_output"],
+        "More text",
+    ]
+    expected_output = input_lines
+    assert_process(input_lines, expected_output)
+
+    # Test case 5: Skip marker at first code block, execute second code block
+    input_lines = [
+        "Some text",
+        MARKERS["skip"],
+        "```python markdown-code-runner",
+        "print('Hello, world!')",
+        "```",
+        MARKERS["start_output"],
+        "This content will not be replaced because of skip marker",
+        MARKERS["end_output"],
+        "More text",
+        "```python markdown-code-runner",
+        "print('Hello again!')",
+        "```",
+        MARKERS["start_output"],
+        "This content will also be replaced",
+        MARKERS["end_output"],
+    ]
+    expected_output = [
+        "Some text",
+        MARKERS["skip"],
+        "```python markdown-code-runner",
+        "print('Hello, world!')",
+        "```",
+        MARKERS["start_output"],
+        "This content will not be replaced because of skip marker",
+        MARKERS["end_output"],
+        "More text",
+        "```python markdown-code-runner",
+        "print('Hello again!')",
+        "```",
+        MARKERS["start_output"],
+        MARKERS["warning"],
+        "Hello again!",
+        "",
+        MARKERS["end_output"],
+    ]
+    assert_process(input_lines, expected_output)
+
+
+def test_mix_md_and_triple_backticks() -> None:
+    """Test the mixing of markdown code blocks and triple backticks."""
+    input_lines = [
+        # ``` code block
+        "Some text",
+        "```python markdown-code-runner",
+        "print('Hello, world!')",
+        "```",
+        "Which will procure the following output:",
+        MARKERS["start_output"],
+        "This content will be replaced.",
+        MARKERS["end_output"],
+        "More text",
+        # ``` code block
+        "```python markdown-code-runner",
+        "print('Hello again!')",
+        "```",
+        MARKERS["start_output"],
+        "This content will also be replaced",
+        MARKERS["end_output"],
+        # ``` code block that is skipped
+        "Some text",
+        MARKERS["skip"],
+        "```python markdown-code-runner",
+        "print('Hello, world!')",
+        "```",
+        MARKERS["start_output"],
+        "This content will not be replaced because of skip marker",
+        MARKERS["end_output"],
+        # Md code block
+        MARKERS["start_code"],
+        md_comment("print('Hello, world!')"),
+        MARKERS["end_code"],
+        MARKERS["start_output"],
+        "This content will be replaced",
+        MARKERS["end_output"],
+        "More text",
+    ]
+    expected_output = [
+        # ``` code block
+        "Some text",
+        "```python markdown-code-runner",
+        "print('Hello, world!')",
+        "```",
+        "Which will procure the following output:",
+        MARKERS["start_output"],
+        MARKERS["warning"],
+        "Hello, world!",
+        "",
+        MARKERS["end_output"],
+        "More text",
+        # ``` code block
+        "```python markdown-code-runner",
+        "print('Hello again!')",
+        "```",
+        MARKERS["start_output"],
+        MARKERS["warning"],
+        "Hello again!",
+        "",
+        MARKERS["end_output"],
+        # ``` code block that is skipped
+        "Some text",
+        MARKERS["skip"],
+        "```python markdown-code-runner",
+        "print('Hello, world!')",
+        "```",
+        MARKERS["start_output"],
+        "This content will not be replaced because of skip marker",
+        MARKERS["end_output"],
+        # Md code block
+        MARKERS["start_code"],
+        md_comment("print('Hello, world!')"),
+        MARKERS["end_code"],
+        MARKERS["start_output"],
+        MARKERS["warning"],
+        "Hello, world!",
+        "",
+        MARKERS["end_output"],
+        "More text",
+    ]
+    assert_process(input_lines, expected_output)
