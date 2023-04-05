@@ -122,7 +122,7 @@ To get started with `markdown-code-runner`, follow these steps:
 
 3.  The output of the code block will be automatically executed and inserted between the output markers.
 
-## Usage
+## :snake: Python API
 
 To use `markdown-code-runner`, simply import the `update_markdown_file` function from the package and call it with the path to your Markdown file:
 
