@@ -163,23 +163,27 @@ class ProcessingState:
         self.original_output = []
         self.output = None  # Reset output after processing end of the output section
 
-    def _process_comment_code(self, line: str, *, verbose: bool) -> None:
-        if is_marker(line, "end_code"):
+    def _process_code(
+        self,
+        line: str,
+        end_marker: str,
+        *,
+        remove_comment: bool = False,
+        verbose: bool,
+    ) -> None:
+        if is_marker(line, end_marker):
             self.section = "normal"
             if not self.skip_code_block:
                 self.output = execute_code(self.code, self.context, verbose=verbose)
             self.code = []
         else:
-            self.code.append(remove_md_comment(line))
+            self.code.append(remove_md_comment(line) if remove_comment else line)
+
+    def _process_comment_code(self, line: str, *, verbose: bool) -> None:
+        self._process_code(line, "end_code", remove_comment=True, verbose=verbose)
 
     def _process_backtick_code(self, line: str, *, verbose: bool) -> None:
-        if is_marker(line, "end_backticks"):
-            self.section = "normal"
-            if not self.skip_code_block:
-                self.output = execute_code(self.code, self.context, verbose=verbose)
-            self.code = []
-        else:
-            self.code.append(line)
+        self._process_code(line, "end_backticks", verbose=verbose)
 
 
 def process_markdown(content: list[str], *, verbose: bool = False) -> list[str]:
