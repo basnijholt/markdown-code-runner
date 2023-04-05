@@ -410,6 +410,8 @@ print(img_html)
 
 <!-- OUTPUT:END -->
 
+> :information_source: **NOTE**: This output is disabled here because GitHub Markdown doesn't support inline image HTML. This will work on other Markdown renderers.
+
 ### :star: Idea 5: Generating a table from CSV data
 
 Suppose you have a CSV file containing data that you want to display as a table in your Markdown file.
