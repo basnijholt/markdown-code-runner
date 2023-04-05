@@ -33,7 +33,7 @@ When creating Markdown files with code examples, it's essential to keep the outp
   - [:computer: Idea 2: Show command-line output](#computer-idea-2-show-command-line-output)
   - [:bar_chart: Idea 3: Generating Markdown Tables](#bar_chart-idea-3-generating-markdown-tables)
   - [:art: Idea 4: Generating Visualizations](#art-idea-4-generating-visualizations)
-  - [:star: Idea 5: Generating a table from CSV data](#star-idea-5-generating-a-table-from-csv-data)
+  - [:page_facing_up: Idea 5: Generating a table from CSV data](#page_facing_up-idea-5-generating-a-table-from-csv-data)
   - [:star: Idea 5: Displaying API data as a list](#star-idea-5-displaying-api-data-as-a-list)
 - [:page_with_curl: License](#page_with_curl-license)
 - [:handshake: Contributing](#handshake-contributing)
