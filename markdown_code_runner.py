@@ -33,6 +33,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import io
+import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -65,6 +66,8 @@ MARKERS = {
     "skip": md_comment("SKIP"),
     "code:backticks:start": "```python markdown-code-runner",
     "code:backticks:end": "```",
+    "code:backticks:bash:start": "```bash markdown-code-runner",
+    "code:backticks:bash:end": "```",
 }
 
 
@@ -79,6 +82,7 @@ def remove_md_comment(commented_text: str) -> str:
 def execute_code(
     code: list[str],
     context: dict[str, Any] | None = None,
+    language: Literal["python", "bash"] = "python",  # type: ignore[name-defined]
     *,
     verbose: bool = False,
 ) -> list[str]:
@@ -89,9 +93,20 @@ def execute_code(
     if verbose:
         print(_bold("\nExecuting code block:"))
         print(f"\n{full_code}\n")
-    with io.StringIO() as f, contextlib.redirect_stdout(f):
-        exec(full_code, context)  # noqa: S102
-        output = f.getvalue().split("\n")
+
+    if language == "python":
+        with io.StringIO() as f, contextlib.redirect_stdout(f):
+            exec(full_code, context)  # noqa: S102
+            output = f.getvalue().split("\n")
+    elif language == "bash":
+        result = subprocess.run(
+            full_code,
+            capture_output=True,
+            text=True,
+            shell=True,
+        )
+        output = result.stdout.split("\n")
+
     if verbose:
         print(_bold("Output:"))
         print(f"\n{output}\n")
@@ -114,7 +129,13 @@ def _bold(text: str) -> str:
 class ProcessingState:
     """State of the processing of a Markdown file."""
 
-    section: Literal["normal", "code:comment", "code:backtick", "output"] = "normal"
+    section: Literal[
+        "normal",
+        "code:comment",
+        "code:backtick",
+        "code:backtick:bash",
+        "output",
+    ] = "normal"
     code: list[str] = field(default_factory=list)
     original_output: list[str] = field(default_factory=list)
     context: dict[str, Any] = field(default_factory=dict)
@@ -130,13 +151,15 @@ class ProcessingState:
             self.section = "code:comment"
         elif is_marker(line, "code:backticks:start"):
             self.section = "code:backtick"
+        elif is_marker(line, "code:backticks:bash:start"):
+            self.section = "code:backtick:bash"
         elif is_marker(line, "output:start"):
             self._process_start_output(line)
         elif is_marker(line, "output:end"):
             self._process_end_output()
         elif self.section == "code:comment":
             self._process_comment_code(line, verbose=verbose)
-        elif self.section == "code:backtick":
+        elif self.section.startswith("code:backtick"):
             self._process_backtick_code(line, verbose=verbose)
         elif self.section == "output":
             self.original_output.append(line)
@@ -172,9 +195,15 @@ class ProcessingState:
         verbose: bool,
     ) -> None:
         if is_marker(line, end_marker):
-            self.section = "normal"
             if not self.skip_code_block:
-                self.output = execute_code(self.code, self.context, verbose=verbose)
+                language = "bash" if self.section == "code:backtick:bash" else "python"
+                self.output = execute_code(
+                    self.code,
+                    self.context,
+                    language,
+                    verbose=verbose,
+                )
+            self.section = "normal"
             self.code = []
         else:
             self.code.append(remove_md_comment(line) if remove_comment else line)
@@ -188,6 +217,7 @@ class ProcessingState:
         )
 
     def _process_backtick_code(self, line: str, *, verbose: bool) -> None:
+        # All end backtick markers are the same
         self._process_code(line, "code:backticks:end", verbose=verbose)
 
 
