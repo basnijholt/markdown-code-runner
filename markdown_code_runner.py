@@ -34,9 +34,16 @@ import argparse
 import contextlib
 import io
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pkg_resources
+
+if TYPE_CHECKING:
+    try:
+        from typing import Literal  # type: ignore[attr-defined]
+    except ImportError:
+        from typing_extensions import Literal
+
 
 __version__ = pkg_resources.get_distribution("markdown-code-runner").version
 
@@ -126,14 +133,12 @@ def process_markdown(  # noqa: PLR0912, PLR0915
     new_lines = []
     code: list[str] = []
     original_output: list[str] = []
-    in_md_code = in_backtick_code = in_output = skip_code_block = False
+    section: Literal["normal", "md_code", "backtick", "output"] = "normal"
+    skip_code_block = False
     output: list[str] | None = None
 
     # add empty line to process last code block (if at end of file)
-    content = [
-        *content,
-        "",
-    ]
+    content = [*content, ""]
     for i, line in enumerate(content):
         if verbose:
             nr = _bold(f"line {i:4d}")
@@ -142,9 +147,9 @@ def process_markdown(  # noqa: PLR0912, PLR0915
         if is_marker(line, "skip"):
             skip_code_block = True
         elif is_marker(line, "start_code"):
-            in_md_code = True
+            section = "md_code"
         elif is_marker(line, "start_output"):
-            in_output = True
+            section = "output"
             if not skip_code_block:
                 assert isinstance(
                     output,
@@ -155,34 +160,34 @@ def process_markdown(  # noqa: PLR0912, PLR0915
             else:
                 original_output.append(line)
         elif is_marker(line, "end_output"):
-            in_output = False
+            section = "normal"
             if skip_code_block:
                 new_lines.extend(original_output)
                 skip_code_block = False
             original_output = []
-        elif in_md_code:
+        elif section == "md_code":
             if is_marker(line, "end_code"):
-                in_md_code = False
+                section = "normal"
                 if not skip_code_block:
                     output = execute_code(code, context, verbose=verbose)
                 code = []
             else:
                 code.append(remove_md_comment(line))
-        elif in_output:
+        elif section == "output":
             original_output.append(line)
-        elif in_backtick_code:
+        elif section == "backtick":
             if is_marker(line, "end_backticks"):
-                in_backtick_code = False
+                section = "normal"
                 if not skip_code_block:
                     output = execute_code(code, context, verbose=verbose)
                 code = []
             else:
                 code.append(line)
         elif is_marker(line, "start_backticks"):
-            in_backtick_code = True
+            section = "backtick"
 
         last_line = i == len(content) - 1
-        if not in_output and not last_line:
+        if section != "output" and not last_line:
             new_lines.append(line)
     return new_lines
 
