@@ -129,22 +129,22 @@ class ProcessingState:
         elif is_marker(line, "start_code"):
             self.section = "md_code"
         elif is_marker(line, "start_output"):
-            self.process_start_output(line)
+            self._process_start_output(line)
         elif is_marker(line, "end_output"):
-            self.process_end_output()
+            self._process_end_output()
         elif self.section == "md_code":
-            self.process_md_code(line, verbose=verbose)
+            self._process_md_code(line, verbose=verbose)
         elif self.section == "output":
             self.original_output.append(line)
         elif self.section == "backtick":
-            self.process_backtick(line, verbose=verbose)
+            self._process_backtick(line, verbose=verbose)
         elif is_marker(line, "start_backticks"):
             self.section = "backtick"
 
         if self.section != "output":
             self.new_lines.append(line)
 
-    def process_start_output(self, line: str) -> None:
+    def _process_start_output(self, line: str) -> None:
         """Process the start of an output section."""
         self.section = "output"
         if not self.skip_code_block:
@@ -156,7 +156,7 @@ class ProcessingState:
         else:
             self.original_output.append(line)
 
-    def process_end_output(self) -> None:
+    def _process_end_output(self) -> None:
         """Process the end of an output section."""
         self.section = "normal"
         if self.skip_code_block:
@@ -165,7 +165,7 @@ class ProcessingState:
         self.original_output = []
         self.output = None  # Reset output after processing end of the output section
 
-    def process_md_code(self, line: str, *, verbose: bool) -> None:
+    def _process_md_code(self, line: str, *, verbose: bool) -> None:
         """Process a line in a code block."""
         if is_marker(line, "end_code"):
             self.section = "normal"
@@ -175,7 +175,7 @@ class ProcessingState:
         else:
             self.code.append(remove_md_comment(line))
 
-    def process_backtick(self, line: str, *, verbose: bool) -> None:
+    def _process_backtick(self, line: str, *, verbose: bool) -> None:
         """Process a line in a code block."""
         if is_marker(line, "end_backticks"):
             self.section = "normal"
