@@ -61,6 +61,18 @@ To get started with `markdown-code-runner`, follow these steps:
     <!-- END_OUTPUT -->
     ````
 
+    or for Bash:
+
+    ````markdown
+    ```bash markdown-code-runner
+    echo 'Hello, world!'
+    ```
+    (Optionally, you can place some text between the code block and the output markers)
+    <!-- START_OUTPUT -->
+    This content will be replaced by the output of the code block above.
+    <!-- END_OUTPUT -->
+    ````
+
     **Method 2 *(hide your code)*:** Place the code between `<!-- START_CODE -->` and `<!-- END_CODE -->` markers. Add the output markers `<!-- START_OUTPUT -->` and `<!-- END_OUTPUT -->` where you want the output to be displayed.
 
     Example:
