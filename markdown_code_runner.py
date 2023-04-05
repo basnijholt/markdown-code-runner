@@ -112,7 +112,7 @@ def _bold(text: str) -> str:
 
 @dataclass
 class ProcessingState:
-    """State of the Markdown file processing."""
+    """State of the processing of a Markdown file."""
 
     section: Literal["normal", "md_code", "backtick", "output"] = "normal"
     code: list[str] = field(default_factory=list)
@@ -122,70 +122,71 @@ class ProcessingState:
     output: list[str] | None = None
     new_lines: list[str] = field(default_factory=list)
 
-    def process_line(  # noqa: PLR0912
-        self,
-        line: str,
-        *,
-        verbose: bool = False,
-    ) -> None:
+    def process_line(self, line: str, *, verbose: bool = False) -> None:
         """Process a line of the Markdown file."""
         if is_marker(line, "skip"):
             self.skip_code_block = True
         elif is_marker(line, "start_code"):
             self.section = "md_code"
         elif is_marker(line, "start_output"):
-            self.section = "output"
-            if not self.skip_code_block:
-                msg = f"Output must be a list, not {type(self.output)}, line: {line}"
-                assert isinstance(self.output, list), msg
-                self.new_lines.extend([line, MARKERS["warning"], *self.output])
-                self.output = None
-            else:
-                self.original_output.append(line)
+            self.process_start_output(line)
         elif is_marker(line, "end_output"):
-            self.section = "normal"
-            if self.skip_code_block:
-                self.new_lines.extend(self.original_output)
-                self.skip_code_block = False
-            self.original_output = []
+            self.process_end_output()
         elif self.section == "md_code":
-            if is_marker(line, "end_code"):
-                self.section = "normal"
-                if not self.skip_code_block:
-                    self.output = execute_code(
-                        self.code,
-                        self.context,
-                        verbose=verbose,
-                    )
-                self.code = []
-            else:
-                self.code.append(remove_md_comment(line))
+            self.process_md_code(line, verbose=verbose)
         elif self.section == "output":
             self.original_output.append(line)
         elif self.section == "backtick":
-            if is_marker(line, "end_backticks"):
-                self.section = "normal"
-                if not self.skip_code_block:
-                    self.output = execute_code(
-                        self.code,
-                        self.context,
-                        verbose=verbose,
-                    )
-                self.code = []
-            else:
-                self.code.append(line)
+            self.process_backtick(line, verbose=verbose)
         elif is_marker(line, "start_backticks"):
             self.section = "backtick"
 
         if self.section != "output":
             self.new_lines.append(line)
 
+    def process_start_output(self, line: str) -> None:
+        """Process the start of an output section."""
+        self.section = "output"
+        if not self.skip_code_block:
+            assert isinstance(
+                self.output,
+                list,
+            ), f"Output must be a list, not {type(self.output)}, line: {line}"
+            self.new_lines.extend([line, MARKERS["warning"], *self.output])
+        else:
+            self.original_output.append(line)
 
-def process_markdown(
-    content: list[str],
-    *,
-    verbose: bool = False,
-) -> list[str]:
+    def process_end_output(self) -> None:
+        """Process the end of an output section."""
+        self.section = "normal"
+        if self.skip_code_block:
+            self.new_lines.extend(self.original_output)
+            self.skip_code_block = False
+        self.original_output = []
+        self.output = None  # Reset output after processing end of the output section
+
+    def process_md_code(self, line: str, *, verbose: bool) -> None:
+        """Process a line in a code block."""
+        if is_marker(line, "end_code"):
+            self.section = "normal"
+            if not self.skip_code_block:
+                self.output = execute_code(self.code, self.context, verbose=verbose)
+            self.code = []
+        else:
+            self.code.append(remove_md_comment(line))
+
+    def process_backtick(self, line: str, *, verbose: bool) -> None:
+        """Process a line in a code block."""
+        if is_marker(line, "end_backticks"):
+            self.section = "normal"
+            if not self.skip_code_block:
+                self.output = execute_code(self.code, self.context, verbose=verbose)
+            self.code = []
+        else:
+            self.code.append(line)
+
+
+def process_markdown(content: list[str], *, verbose: bool = False) -> list[str]:
     """Executes code blocks in a list of Markdown-formatted strings and returns the modified list.
 
     Parameters
@@ -202,12 +203,13 @@ def process_markdown(
     """
     assert isinstance(content, list), "Input must be a list"
     state = ProcessingState()
-    # add empty line to process last code block (if at end of file)
+
     for i, line in enumerate(content):
         if verbose:
             nr = _bold(f"line {i:4d}")
             print(f"{nr}: {line}")
         state.process_line(line, verbose=verbose)
+
     return state.new_lines
 
 
