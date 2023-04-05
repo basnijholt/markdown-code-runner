@@ -17,16 +17,24 @@ Example:
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
 This will be replaced by the output of the code block above.
-
 <!-- OUTPUT:END -->
 ```
-Alternatively, you can add a <!-- SKIP --> comment to skip a code block.
+Alternatively, you can add a <!-- CODE:SKIP --> comment to skip a code block.
 
 Another way is to run code blocks in triple backticks:
 ```python markdown-code-runner
 print('Hello, world!')
 ```
-Which will print the output of the code block above below the code block.
+Which will print the output of the code block between the output markers:
+<!-- OUTPUT:START -->
+This will be replaced by the output of the code block above.
+<!-- OUTPUT:END -->
+
+You can also run bash code blocks:
+```bash markdown-code-runner
+echo "Hello, world!"
+```
+Which will similarly print the output of the code block between next to the output markers.
 """
 from __future__ import annotations
 
@@ -63,7 +71,7 @@ MARKERS = {
     "code:comment:end": md_comment("CODE:END"),
     "output:start": md_comment("OUTPUT:START"),
     "output:end": md_comment("OUTPUT:END"),
-    "skip": md_comment("SKIP"),
+    "skip": md_comment("CODE:SKIP"),
     "code:backticks:start": "```python markdown-code-runner",
     "code:backticks:end": "```",
     "code:backticks:bash:start": "```bash markdown-code-runner",

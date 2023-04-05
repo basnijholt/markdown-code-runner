@@ -119,7 +119,7 @@ update_markdown_file(Path("path/to/your/markdown_file.md"))
 Here are a few examples demonstrating the usage of `markdown-code-runner`:
 
 ### :star: Example 1: Simple code block
-<!-- SKIP -->
+<!-- CODE:SKIP -->
 ```markdown
 This is an example of a simple code block:
 
@@ -146,7 +146,7 @@ Hello, world!
 ```
 
 ### :star: Example 2: Multiple code blocks
-<!-- SKIP -->
+<!-- CODE:SKIP -->
 ```markdown
 Here are two code blocks:
 
@@ -160,7 +160,7 @@ This content will be replaced by the output of the first code block.
 <!-- OUTPUT:END -->
 ```
 
-<!-- SKIP -->
+<!-- CODE:SKIP -->
 ```markdown
 Second code block:
 
@@ -291,7 +291,7 @@ For more information on configuring GitHub Actions, check out the [official docu
 Use `markdown-code-runner` to display the output of a command-line program. For example, the following Markdown file shows the helper options of this package.
 
 Using a hidden code block:
-<!-- SKIP -->
+<!-- CODE:SKIP -->
 ```markdown
 <!-- CODE:START -->
 <!-- import subprocess -->
@@ -370,7 +370,7 @@ Create a visualization using the `matplotlib` library and save it as an image. T
 
 Using a triple-backtick code block:
 
-<!-- SKIP -->
+<!-- CODE:SKIP -->
 ```python markdown-code-runner
 import matplotlib.pyplot as plt
 import io
@@ -441,7 +441,7 @@ In this example, we'll use the `requests` library to fetch data from an API and 
 
 Using a hidden code block:
 
-<!-- SKIP -->
+<!-- CODE:SKIP -->
 ```markdown
 <!-- CODE:START -->
 <!-- import requests -->
