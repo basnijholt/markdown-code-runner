@@ -47,7 +47,21 @@ To get started with `markdown-code-runner`, follow these steps:
 
 1.  Add code blocks to your Markdown file using either of the following methods:
 
-    **Method 1 *(hide your code)*:** Place the code between `<!-- START_CODE -->` and `<!-- END_CODE -->` markers. Add the output markers `<!-- START_OUTPUT -->` and `<!-- END_OUTPUT -->` where you want the output to be displayed.
+    **Method 1 (*show your code*):** Use a triple backtick code block with the language specifier `python markdown-code-runner`.
+
+    Example:
+
+    ````markdown
+    ```python markdown-code-runner
+    print('Hello, world!')
+    ```
+    (Optionally, you can place some text between the code block and the output markers)
+    <!-- START_OUTPUT -->
+    This content will be replaced by the output of the code block above.
+    <!-- END_OUTPUT -->
+    ````
+
+    **Method 2 *(hide your code)*:** Place the code between `<!-- START_CODE -->` and `<!-- END_CODE -->` markers. Add the output markers `<!-- START_OUTPUT -->` and `<!-- END_OUTPUT -->` where you want the output to be displayed.
 
     Example:
 
@@ -61,20 +75,6 @@ To get started with `markdown-code-runner`, follow these steps:
     This content will be replaced by the output of the code block above.
     <!-- END_OUTPUT -->
     ```
-
-    **Method 2 (*show your code*):** Use a triple backtick code block with the language specifier `python markdown-code-runner`.
-
-    Example:
-
-    ````markdown
-    ```python markdown-code-runner
-    print('Hello, world!')
-    ```
-    (Optionally, you can place some text between the code block and the output markers)
-    <!-- START_OUTPUT -->
-    This content will be replaced by the output of the code block above.
-    <!-- END_OUTPUT -->
-    ````
 
 2.  Run `markdown-code-runner` on your Markdown file:
 
