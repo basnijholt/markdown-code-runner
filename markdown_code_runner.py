@@ -33,6 +33,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import io
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -109,11 +110,83 @@ def _bold(text: str) -> str:
     return f"{bold}{text}{reset}"
 
 
-def process_markdown(  # noqa: PLR0912, PLR0915
-    content: list[str],
-    *,
-    verbose: bool = False,
-) -> list[str]:
+@dataclass
+class ProcessingState:
+    """State of the processing of a Markdown file."""
+
+    section: Literal["normal", "comment_code", "backtick_code", "output"] = "normal"
+    code: list[str] = field(default_factory=list)
+    original_output: list[str] = field(default_factory=list)
+    context: dict[str, Any] = field(default_factory=dict)
+    skip_code_block: bool = False
+    output: list[str] | None = None
+    new_lines: list[str] = field(default_factory=list)
+
+    def process_line(self, line: str, *, verbose: bool = False) -> None:
+        """Process a line of the Markdown file."""
+        if is_marker(line, "skip"):
+            self.skip_code_block = True
+        elif is_marker(line, "start_code"):
+            self.section = "comment_code"
+        elif is_marker(line, "start_output"):
+            self._process_start_output(line)
+        elif is_marker(line, "end_output"):
+            self._process_end_output()
+        elif self.section == "comment_code":
+            self._process_comment_code(line, verbose=verbose)
+        elif self.section == "output":
+            self.original_output.append(line)
+        elif self.section == "backtick_code":
+            self._process_backtick_code(line, verbose=verbose)
+        elif is_marker(line, "start_backticks"):
+            self.section = "backtick_code"
+
+        if self.section != "output":
+            self.new_lines.append(line)
+
+    def _process_start_output(self, line: str) -> None:
+        self.section = "output"
+        if not self.skip_code_block:
+            assert isinstance(
+                self.output,
+                list,
+            ), f"Output must be a list, not {type(self.output)}, line: {line}"
+            self.new_lines.extend([line, MARKERS["warning"], *self.output])
+        else:
+            self.original_output.append(line)
+
+    def _process_end_output(self) -> None:
+        self.section = "normal"
+        if self.skip_code_block:
+            self.new_lines.extend(self.original_output)
+            self.skip_code_block = False
+        self.original_output = []
+        self.output = None  # Reset output after processing end of the output section
+
+    def _process_code(
+        self,
+        line: str,
+        end_marker: str,
+        *,
+        remove_comment: bool = False,
+        verbose: bool,
+    ) -> None:
+        if is_marker(line, end_marker):
+            self.section = "normal"
+            if not self.skip_code_block:
+                self.output = execute_code(self.code, self.context, verbose=verbose)
+            self.code = []
+        else:
+            self.code.append(remove_md_comment(line) if remove_comment else line)
+
+    def _process_comment_code(self, line: str, *, verbose: bool) -> None:
+        self._process_code(line, "end_code", remove_comment=True, verbose=verbose)
+
+    def _process_backtick_code(self, line: str, *, verbose: bool) -> None:
+        self._process_code(line, "end_backticks", verbose=verbose)
+
+
+def process_markdown(content: list[str], *, verbose: bool = False) -> list[str]:
     """Executes code blocks in a list of Markdown-formatted strings and returns the modified list.
 
     Parameters
@@ -129,65 +202,15 @@ def process_markdown(  # noqa: PLR0912, PLR0915
         A modified list of Markdown-formatted strings with code block output inserted.
     """
     assert isinstance(content, list), "Input must be a list"
-    context: dict[str, Any] = {}
-    new_lines = []
-    code: list[str] = []
-    original_output: list[str] = []
-    section: Literal["normal", "md_code", "backtick", "output"] = "normal"
-    skip_code_block = False
-    output: list[str] | None = None
+    state = ProcessingState()
 
-    # add empty line to process last code block (if at end of file)
-    content = [*content, ""]
     for i, line in enumerate(content):
         if verbose:
             nr = _bold(f"line {i:4d}")
             print(f"{nr}: {line}")
+        state.process_line(line, verbose=verbose)
 
-        if is_marker(line, "skip"):
-            skip_code_block = True
-        elif is_marker(line, "start_code"):
-            section = "md_code"
-        elif is_marker(line, "start_output"):
-            section = "output"
-            if not skip_code_block:
-                msg = f"Output must be a list, not {type(output)}, line: {line}"
-                assert isinstance(output, list), msg
-                new_lines.extend([line, MARKERS["warning"], *output])
-                output = None
-            else:
-                original_output.append(line)
-        elif is_marker(line, "end_output"):
-            section = "normal"
-            if skip_code_block:
-                new_lines.extend(original_output)
-                skip_code_block = False
-            original_output = []
-        elif section == "md_code":
-            if is_marker(line, "end_code"):
-                section = "normal"
-                if not skip_code_block:
-                    output = execute_code(code, context, verbose=verbose)
-                code = []
-            else:
-                code.append(remove_md_comment(line))
-        elif section == "output":
-            original_output.append(line)
-        elif section == "backtick":
-            if is_marker(line, "end_backticks"):
-                section = "normal"
-                if not skip_code_block:
-                    output = execute_code(code, context, verbose=verbose)
-                code = []
-            else:
-                code.append(line)
-        elif is_marker(line, "start_backticks"):
-            section = "backtick"
-
-        last_line = i == len(content) - 1
-        if section != "output" and not last_line:
-            new_lines.append(line)
-    return new_lines
+    return state.new_lines
 
 
 def update_markdown_file(
