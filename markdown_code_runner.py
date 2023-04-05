@@ -114,7 +114,7 @@ def _bold(text: str) -> str:
 class ProcessingState:
     """State of the processing of a Markdown file."""
 
-    section: Literal["normal", "md_code", "backtick", "output"] = "normal"
+    section: Literal["normal", "comment_code", "backtick_code", "output"] = "normal"
     code: list[str] = field(default_factory=list)
     original_output: list[str] = field(default_factory=list)
     context: dict[str, Any] = field(default_factory=dict)
@@ -127,19 +127,19 @@ class ProcessingState:
         if is_marker(line, "skip"):
             self.skip_code_block = True
         elif is_marker(line, "start_code"):
-            self.section = "md_code"
+            self.section = "comment_code"
         elif is_marker(line, "start_output"):
             self._process_start_output(line)
         elif is_marker(line, "end_output"):
             self._process_end_output()
-        elif self.section == "md_code":
-            self._process_md_code(line, verbose=verbose)
+        elif self.section == "comment_code":
+            self._process_comment_code(line, verbose=verbose)
         elif self.section == "output":
             self.original_output.append(line)
-        elif self.section == "backtick":
-            self._process_backtick(line, verbose=verbose)
+        elif self.section == "backtick_code":
+            self._process_backtick_code(line, verbose=verbose)
         elif is_marker(line, "start_backticks"):
-            self.section = "backtick"
+            self.section = "backtick_code"
 
         if self.section != "output":
             self.new_lines.append(line)
@@ -163,7 +163,7 @@ class ProcessingState:
         self.original_output = []
         self.output = None  # Reset output after processing end of the output section
 
-    def _process_md_code(self, line: str, *, verbose: bool) -> None:
+    def _process_comment_code(self, line: str, *, verbose: bool) -> None:
         if is_marker(line, "end_code"):
             self.section = "normal"
             if not self.skip_code_block:
@@ -172,7 +172,7 @@ class ProcessingState:
         else:
             self.code.append(remove_md_comment(line))
 
-    def _process_backtick(self, line: str, *, verbose: bool) -> None:
+    def _process_backtick_code(self, line: str, *, verbose: bool) -> None:
         if is_marker(line, "end_backticks"):
             self.section = "normal"
             if not self.skip_code_block:
