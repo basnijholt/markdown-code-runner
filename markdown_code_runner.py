@@ -33,7 +33,6 @@ from __future__ import annotations
 import argparse
 import contextlib
 import io
-import re
 from pathlib import Path
 from typing import Any
 
@@ -56,6 +55,8 @@ MARKERS = {
     "start_output": md_comment("START_OUTPUT"),
     "end_output": md_comment("END_OUTPUT"),
     "skip": md_comment("SKIP"),
+    "start_backticks": "```python markdown-code-runner",
+    "end_backticks": "```",
 }
 
 
@@ -128,7 +129,6 @@ def process_markdown(  # noqa: PLR0912, PLR0915
     in_md_code = in_backtick_code = in_output = skip_code_block = False
     output: list[str] | None = None
 
-    triple_backtick_pattern = re.compile(r"^```python markdown-code-runner")
     # add empty line to process last code block (if at end of file)
     content = [
         *content,
@@ -171,14 +171,14 @@ def process_markdown(  # noqa: PLR0912, PLR0915
         elif in_output:
             original_output.append(line)
         elif in_backtick_code:
-            if line.strip() == "```":
+            if is_marker(line, "end_backticks"):
                 in_backtick_code = False
                 if not skip_code_block:
                     output = execute_code(code, context, verbose=verbose)
                 code = []
             else:
                 code.append(line)
-        elif triple_backtick_pattern.match(line):
+        elif is_marker(line, "start_backticks"):
             in_backtick_code = True
 
         last_line = i == len(content) - 1
