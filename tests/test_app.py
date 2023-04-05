@@ -535,7 +535,7 @@ def test_two_code_blocks_but_first_without_output() -> None:
 
 def test_bash() -> None:
     """Test that bash code is executed."""
-    # Test case 1: Single code block
+    # Test case 1 (backticks): Single code block
     input_lines = [
         "Some text",
         "```bash markdown-code-runner",
@@ -551,6 +551,31 @@ def test_bash() -> None:
         "```bash markdown-code-runner",
         'echo "Hello, world!"',
         "```",
+        MARKERS["output:start"],
+        MARKERS["warning"],
+        "Hello, world!",
+        "",
+        MARKERS["output:end"],
+        "More text",
+    ]
+    assert_process(input_lines, expected_output)
+
+    # Test case 1 (hidden): Single code block
+    input_lines = [
+        "Some text",
+        MARKERS["code:comment:bash:start"],
+        md_comment('echo "Hello, world!"'),
+        MARKERS["code:comment:end"],
+        MARKERS["output:start"],
+        "This content will be replaced",
+        MARKERS["output:end"],
+        "More text",
+    ]
+    expected_output = [
+        "Some text",
+        MARKERS["code:comment:bash:start"],
+        md_comment('echo "Hello, world!"'),
+        MARKERS["code:comment:end"],
         MARKERS["output:start"],
         MARKERS["warning"],
         "Hello, world!",

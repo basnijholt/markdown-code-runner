@@ -95,6 +95,19 @@ To get started with `markdown-code-runner`, follow these steps:
     <!-- OUTPUT:END -->
     ```
 
+    or for Bash:
+
+    ```markdown
+    This is an example code block:
+
+    <!-- CODE:BASH:START -->
+    <!-- echo 'Hello, world!' -->
+    <!-- CODE:END -->
+    <!-- OUTPUT:START -->
+    This content will be replaced by the output of the code block above.
+    <!-- OUTPUT:END -->
+    ```
+
 2.  Run `markdown-code-runner` on your Markdown file:
 
     ```bash
