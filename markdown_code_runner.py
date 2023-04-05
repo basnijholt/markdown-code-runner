@@ -67,7 +67,7 @@ def remove_md_comment(commented_text: str) -> str:
     return commented_text[5:-4]
 
 
-def execute_code_block(
+def execute_code(
     code: list[str],
     context: dict[str, Any] | None = None,
     *,
@@ -76,13 +76,17 @@ def execute_code_block(
     """Execute a code block and return its output as a list of strings."""
     if context is None:
         context = {}
-    f = io.StringIO()
     full_code = "\n".join(code)
     if verbose:
-        print(f"Executing code block:\n{full_code}\n")
-    with contextlib.redirect_stdout(f):
+        print(_bold("\nExecuting code block:"))
+        print(f"\n{full_code}\n")
+    with io.StringIO() as f, contextlib.redirect_stdout(f):
         exec(full_code, context)  # noqa: S102
-    return f.getvalue().split("\n")
+        output = f.getvalue().split("\n")
+    if verbose:
+        print(_bold("Output:"))
+        print(f"\n{output}\n")
+    return output
 
 
 def is_marker(line: str, marker: str) -> bool:
@@ -160,7 +164,7 @@ def process_markdown(  # noqa: PLR0912, PLR0915
             if is_marker(line, "end_code"):
                 in_md_code = False
                 if not skip_code_block:
-                    output = execute_code_block(code, context, verbose=verbose)
+                    output = execute_code(code, context, verbose=verbose)
                 code = []
             else:
                 code.append(remove_md_comment(line))
@@ -170,7 +174,7 @@ def process_markdown(  # noqa: PLR0912, PLR0915
             if line.strip() == "```":
                 in_backtick_code = False
                 if not skip_code_block:
-                    output = execute_code_block(code, context, verbose=verbose)
+                    output = execute_code(code, context, verbose=verbose)
                 code = []
             else:
                 code.append(line)

@@ -9,7 +9,7 @@ import pytest
 
 from markdown_code_runner import (
     MARKERS,
-    execute_code_block,
+    execute_code,
     main,
     md_comment,
     process_markdown,
@@ -173,9 +173,9 @@ def test_remove_md_comment() -> None:
 
 
 def test_execute_code_block() -> None:
-    """Test the execute_code_block function."""
+    """Test the execute_code function."""
     code = ["print('Hello, world!')"]
-    output = execute_code_block(code)
+    output = execute_code(code)
     expected_output = ["Hello, world!", ""]
     assert output == expected_output, f"Expected {expected_output}, got {output}"
 
