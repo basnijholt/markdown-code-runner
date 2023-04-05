@@ -99,7 +99,7 @@ def execute_code(
         context = {}
     full_code = "\n".join(code)
     if verbose:
-        print(_bold("\nExecuting code block:"))
+        print(_bold(f"\nExecuting code {language} block:"))
         print(f"\n{full_code}\n")
 
     if language == "python":
