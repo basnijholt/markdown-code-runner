@@ -145,7 +145,6 @@ class ProcessingState:
             self.new_lines.append(line)
 
     def _process_start_output(self, line: str) -> None:
-        """Process the start of an output section."""
         self.section = "output"
         if not self.skip_code_block:
             assert isinstance(
@@ -157,7 +156,6 @@ class ProcessingState:
             self.original_output.append(line)
 
     def _process_end_output(self) -> None:
-        """Process the end of an output section."""
         self.section = "normal"
         if self.skip_code_block:
             self.new_lines.extend(self.original_output)
@@ -166,7 +164,6 @@ class ProcessingState:
         self.output = None  # Reset output after processing end of the output section
 
     def _process_md_code(self, line: str, *, verbose: bool) -> None:
-        """Process a line in a code block."""
         if is_marker(line, "end_code"):
             self.section = "normal"
             if not self.skip_code_block:
@@ -176,7 +173,6 @@ class ProcessingState:
             self.code.append(remove_md_comment(line))
 
     def _process_backtick(self, line: str, *, verbose: bool) -> None:
-        """Process a line in a code block."""
         if is_marker(line, "end_backticks"):
             self.section = "normal"
             if not self.skip_code_block:
