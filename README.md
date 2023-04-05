@@ -101,7 +101,8 @@ To get started with `markdown-code-runner`, follow these steps:
     This is an example code block:
 
     <!-- CODE:BASH:START -->
-    <!-- echo 'Hello, world!' -->
+    <!-- MY_VAR="Hello, World!" -->
+    <!-- echo $MY_VAR -->
     <!-- CODE:END -->
     <!-- OUTPUT:START -->
     This content will be replaced by the output of the code block above.

@@ -584,3 +584,33 @@ def test_bash() -> None:
         "More text",
     ]
     assert_process(input_lines, expected_output)
+
+
+def test_bash_variables() -> None:
+    """Test that bash code is executed."""
+    # Test case 1 (backticks): Single code block
+    input_lines = [
+        "Some text",
+        "```bash markdown-code-runner",
+        'MY_VAR="Hello, world!"',
+        "echo $MY_VAR",
+        "```",
+        MARKERS["output:start"],
+        "This content will be replaced",
+        MARKERS["output:end"],
+        "More text",
+    ]
+    expected_output = [
+        "Some text",
+        "```bash markdown-code-runner",
+        'MY_VAR="Hello, world!"',
+        "echo $MY_VAR",
+        "```",
+        MARKERS["output:start"],
+        MARKERS["warning"],
+        "Hello, world!",
+        "",
+        MARKERS["output:end"],
+        "More text",
+    ]
+    assert_process(input_lines, expected_output)
