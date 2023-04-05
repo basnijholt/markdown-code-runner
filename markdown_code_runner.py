@@ -124,17 +124,11 @@ class ProcessingState:
 
     def process_line(  # noqa: PLR0912
         self,
-        i: int,
         line: str,
-        content: list[str],
         *,
         verbose: bool = False,
     ) -> None:
         """Process a line of the Markdown file."""
-        if verbose:
-            nr = _bold(f"line {i:4d}")
-            print(f"{nr}: {line}")
-
         if is_marker(line, "skip"):
             self.skip_code_block = True
         elif is_marker(line, "start_code"):
@@ -183,8 +177,7 @@ class ProcessingState:
         elif is_marker(line, "start_backticks"):
             self.section = "backtick"
 
-        last_line = i == len(content) - 1
-        if self.section != "output" and not last_line:
+        if self.section != "output":
             self.new_lines.append(line)
 
 
@@ -210,9 +203,11 @@ def process_markdown(
     assert isinstance(content, list), "Input must be a list"
     state = ProcessingState()
     # add empty line to process last code block (if at end of file)
-    content = [*content, ""]
     for i, line in enumerate(content):
-        state.process_line(i, line, content, verbose=verbose)
+        if verbose:
+            nr = _bold(f"line {i:4d}")
+            print(f"{nr}: {line}")
+        state.process_line(line, verbose=verbose)
     return state.new_lines
 
 
