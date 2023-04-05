@@ -128,12 +128,12 @@ class ProcessingState:
             self.skip_code_block = True
         elif is_marker(line, "code:comment:start"):
             self.section = "code:comment"
+        elif is_marker(line, "code:backticks:start"):
+            self.section = "code:backtick"
         elif is_marker(line, "output:start"):
             self._process_start_output(line)
         elif is_marker(line, "output:end"):
             self._process_end_output()
-        elif is_marker(line, "code:backticks:start"):
-            self.section = "code:backtick"
         elif self.section == "code:comment":
             self._process_comment_code(line, verbose=verbose)
         elif self.section == "code:backtick":
