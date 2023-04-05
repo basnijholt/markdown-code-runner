@@ -18,7 +18,7 @@ Example:
 <!-- OUTPUT:START -->
 This will be replaced by the output of the code block above.
 <!-- OUTPUT:END -->
-```
+
 Alternatively, you can add a <!-- CODE:SKIP --> comment to skip a code block.
 
 Another way is to run code blocks in triple backticks:
