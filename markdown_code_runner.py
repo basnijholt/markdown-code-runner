@@ -122,8 +122,73 @@ class ProcessingState:
     output: list[str] | None = None
     new_lines: list[str] = field(default_factory=list)
 
+    def process_line(  # noqa: PLR0912
+        self,
+        i: int,
+        line: str,
+        content: list[str],
+        *,
+        verbose: bool = False,
+    ) -> None:
+        """Process a line of the Markdown file."""
+        if verbose:
+            nr = _bold(f"line {i:4d}")
+            print(f"{nr}: {line}")
 
-def process_markdown(  # noqa: PLR0912
+        if is_marker(line, "skip"):
+            self.skip_code_block = True
+        elif is_marker(line, "start_code"):
+            self.section = "md_code"
+        elif is_marker(line, "start_output"):
+            self.section = "output"
+            if not self.skip_code_block:
+                msg = f"Output must be a list, not {type(self.output)}, line: {line}"
+                assert isinstance(self.output, list), msg
+                self.new_lines.extend([line, MARKERS["warning"], *self.output])
+                self.output = None
+            else:
+                self.original_output.append(line)
+        elif is_marker(line, "end_output"):
+            self.section = "normal"
+            if self.skip_code_block:
+                self.new_lines.extend(self.original_output)
+                self.skip_code_block = False
+            self.original_output = []
+        elif self.section == "md_code":
+            if is_marker(line, "end_code"):
+                self.section = "normal"
+                if not self.skip_code_block:
+                    self.output = execute_code(
+                        self.code,
+                        self.context,
+                        verbose=verbose,
+                    )
+                self.code = []
+            else:
+                self.code.append(remove_md_comment(line))
+        elif self.section == "output":
+            self.original_output.append(line)
+        elif self.section == "backtick":
+            if is_marker(line, "end_backticks"):
+                self.section = "normal"
+                if not self.skip_code_block:
+                    self.output = execute_code(
+                        self.code,
+                        self.context,
+                        verbose=verbose,
+                    )
+                self.code = []
+            else:
+                self.code.append(line)
+        elif is_marker(line, "start_backticks"):
+            self.section = "backtick"
+
+        last_line = i == len(content) - 1
+        if self.section != "output" and not last_line:
+            self.new_lines.append(line)
+
+
+def process_markdown(
     content: list[str],
     *,
     verbose: bool = False,
@@ -147,61 +212,7 @@ def process_markdown(  # noqa: PLR0912
     # add empty line to process last code block (if at end of file)
     content = [*content, ""]
     for i, line in enumerate(content):
-        if verbose:
-            nr = _bold(f"line {i:4d}")
-            print(f"{nr}: {line}")
-
-        if is_marker(line, "skip"):
-            state.skip_code_block = True
-        elif is_marker(line, "start_code"):
-            state.section = "md_code"
-        elif is_marker(line, "start_output"):
-            state.section = "output"
-            if not state.skip_code_block:
-                msg = f"Output must be a list, not {type(state.output)}, line: {line}"
-                assert isinstance(state.output, list), msg
-                state.new_lines.extend([line, MARKERS["warning"], *state.output])
-                state.output = None
-            else:
-                state.original_output.append(line)
-        elif is_marker(line, "end_output"):
-            state.section = "normal"
-            if state.skip_code_block:
-                state.new_lines.extend(state.original_output)
-                state.skip_code_block = False
-            state.original_output = []
-        elif state.section == "md_code":
-            if is_marker(line, "end_code"):
-                state.section = "normal"
-                if not state.skip_code_block:
-                    state.output = execute_code(
-                        state.code,
-                        state.context,
-                        verbose=verbose,
-                    )
-                state.code = []
-            else:
-                state.code.append(remove_md_comment(line))
-        elif state.section == "output":
-            state.original_output.append(line)
-        elif state.section == "backtick":
-            if is_marker(line, "end_backticks"):
-                state.section = "normal"
-                if not state.skip_code_block:
-                    state.output = execute_code(
-                        state.code,
-                        state.context,
-                        verbose=verbose,
-                    )
-                state.code = []
-            else:
-                state.code.append(line)
-        elif is_marker(line, "start_backticks"):
-            state.section = "backtick"
-
-        last_line = i == len(content) - 1
-        if state.section != "output" and not last_line:
-            state.new_lines.append(line)
+        state.process_line(i, line, content, verbose=verbose)
     return state.new_lines
 
 
