@@ -31,7 +31,7 @@ jobs:
           pip install pandas tabulate pytest matplotlib requests
 
       - name: Run update-readme.py
-        run: markdown-code-runner README.md
+        run: markdown-code-runner --verbose README.md
 
       - name: Commit updated README.md
         id: commit
