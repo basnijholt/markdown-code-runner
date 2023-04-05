@@ -120,9 +120,10 @@ class ProcessingState:
     context: dict[str, Any] = field(default_factory=dict)
     skip_code_block: bool = False
     output: list[str] | None = None
+    new_lines: list[str] = field(default_factory=list)
 
 
-def process_markdown(  # noqa: PLR0912, PLR0915
+def process_markdown(  # noqa: PLR0912
     content: list[str],
     *,
     verbose: bool = False,
@@ -143,7 +144,6 @@ def process_markdown(  # noqa: PLR0912, PLR0915
     """
     assert isinstance(content, list), "Input must be a list"
     state = ProcessingState()
-    new_lines = []
     # add empty line to process last code block (if at end of file)
     content = [*content, ""]
     for i, line in enumerate(content):
@@ -160,14 +160,14 @@ def process_markdown(  # noqa: PLR0912, PLR0915
             if not state.skip_code_block:
                 msg = f"Output must be a list, not {type(state.output)}, line: {line}"
                 assert isinstance(state.output, list), msg
-                new_lines.extend([line, MARKERS["warning"], *state.output])
+                state.new_lines.extend([line, MARKERS["warning"], *state.output])
                 state.output = None
             else:
                 state.original_output.append(line)
         elif is_marker(line, "end_output"):
             state.section = "normal"
             if state.skip_code_block:
-                new_lines.extend(state.original_output)
+                state.new_lines.extend(state.original_output)
                 state.skip_code_block = False
             state.original_output = []
         elif state.section == "md_code":
@@ -201,8 +201,8 @@ def process_markdown(  # noqa: PLR0912, PLR0915
 
         last_line = i == len(content) - 1
         if state.section != "output" and not last_line:
-            new_lines.append(line)
-    return new_lines
+            state.new_lines.append(line)
+    return state.new_lines
 
 
 def update_markdown_file(
