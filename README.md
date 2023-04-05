@@ -29,7 +29,7 @@ This ensures that the displayed output is always in sync with the code, and cont
 
 - [:computer: Installation](#computer-installation)
 - [:rocket: Quick Start](#rocket-quick-start)
-- [Usage](#usage)
+- [:snake: Python API](#snake-python-api)
 - [:book: Examples](#book-examples)
   - [:star: Example 1: Simple code block](#star-example-1-simple-code-block)
   - [:star: Example 2: Multiple code blocks](#star-example-2-multiple-code-blocks)
