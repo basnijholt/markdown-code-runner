@@ -195,7 +195,6 @@ class ProcessingState:
         verbose: bool,
     ) -> None:
         if is_marker(line, end_marker):
-            self.section = "normal"
             if not self.skip_code_block:
                 language = "bash" if self.section == "code:backtick:bash" else "python"
                 self.output = execute_code(
@@ -204,6 +203,7 @@ class ProcessingState:
                     language,
                     verbose=verbose,
                 )
+            self.section = "normal"
             self.code = []
         else:
             self.code.append(remove_md_comment(line) if remove_comment else line)
@@ -217,6 +217,7 @@ class ProcessingState:
         )
 
     def _process_backtick_code(self, line: str, *, verbose: bool) -> None:
+        # All end backtick markers are the same
         self._process_code(line, "code:backticks:end", verbose=verbose)
 
 
