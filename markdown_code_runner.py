@@ -262,25 +262,25 @@ def update_markdown_file(
     input_filepath: Path | str,
     output_filepath: Path | str | None = None,
     *,
-    debug: bool = False,
+    verbose: bool = False,
 ) -> None:
     """Rewrite a Markdown file by executing and updating code blocks."""
     if isinstance(input_filepath, str):  # pragma: no cover
         input_filepath = Path(input_filepath)
     with input_filepath.open() as f:
         original_lines = [line.rstrip("\n") for line in f.readlines()]
-    if debug:
+    if verbose:
         print(f"Processing input file: {input_filepath}")
-    new_lines = process_markdown(original_lines, verbose=debug)
+    new_lines = process_markdown(original_lines, verbose=verbose)
     updated_content = "\n".join(new_lines).rstrip() + "\n"
-    if debug:
+    if verbose:
         print(f"Writing output to: {output_filepath}")
     output_filepath = (
         input_filepath if output_filepath is None else Path(output_filepath)
     )
     with output_filepath.open("w") as f:
         f.write(updated_content)
-    if debug:
+    if verbose:
         print("Done!")
 
 
@@ -303,7 +303,7 @@ def main() -> None:
     )
     parser.add_argument(
         "-d",
-        "--debug",
+        "--verbose",
         action="store_true",
         help="Enable debugging mode (default: False)",
     )
@@ -318,7 +318,7 @@ def main() -> None:
 
     input_filepath = Path(args.input)
     output_filepath = Path(args.output) if args.output is not None else input_filepath
-    update_markdown_file(input_filepath, output_filepath, debug=args.debug)
+    update_markdown_file(input_filepath, output_filepath, verbose=args.verbose)
 
 
 if __name__ == "__main__":

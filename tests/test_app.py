@@ -188,7 +188,11 @@ def test_main_no_arguments(tmp_path: Path) -> None:
 
     with patch(
         "argparse.ArgumentParser.parse_args",
-        return_value=argparse.Namespace(input=test_filepath, output=None, debug=False),
+        return_value=argparse.Namespace(
+            input=test_filepath,
+            output=None,
+            verbose=False,
+        ),
     ):
         main()
         assert output_filepath.exists() is False
@@ -207,7 +211,7 @@ def test_main_filepath_argument(tmp_path: Path) -> None:
         return_value=argparse.Namespace(
             input=test_filepath,
             output=str(output_filepath),
-            debug=False,
+            verbose=False,
         ),
     ):
         main()
@@ -217,7 +221,7 @@ def test_main_filepath_argument(tmp_path: Path) -> None:
 
 
 def test_main_debug_mode(capfd: pytest.CaptureFixture, tmp_path: Path) -> None:
-    """Test the main function with debug mode enabled."""
+    """Test the main function with verbose mode enabled."""
     test_filepath = TEST_FOLDER / "test.md"
     output_filepath = tmp_path / "output.md"
     expected_output_filepath = TEST_FOLDER / "test_expected_output.md"
@@ -227,7 +231,7 @@ def test_main_debug_mode(capfd: pytest.CaptureFixture, tmp_path: Path) -> None:
         return_value=argparse.Namespace(
             input=test_filepath,
             output=str(output_filepath),
-            debug=True,
+            verbose=True,
         ),
     ):
         main()

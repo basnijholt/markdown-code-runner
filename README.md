@@ -334,7 +334,7 @@ options:
   -o OUTPUT, --output OUTPUT
                         Path to the output Markdown file. (default: overwrite
                         input file)
-  -d, --debug           Enable debugging mode (default: False)
+  -d, --verbose         Enable debugging mode (default: False)
   -v, --version         show program's version number and exit
 ```
 
