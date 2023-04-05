@@ -12,6 +12,7 @@ The package is hosted on GitHub: [https://github.com/basnijholt/markdown-code-ru
 - :snake: :shell: Works with Python and Bash code blocks
 - :white_check_mark: Keeps the output of the code blocks up-to-date
 - :octocat: Easily integrates with GitHub Actions
+- :tada: No external dependencies and works with Python 3.7+
 
 ## :question: Problem Statement
 
