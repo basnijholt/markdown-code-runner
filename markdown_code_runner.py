@@ -151,10 +151,8 @@ def process_markdown(  # noqa: PLR0912, PLR0915
         elif is_marker(line, "start_output"):
             section = "output"
             if not skip_code_block:
-                assert isinstance(
-                    output,
-                    list,
-                ), f"Output must be a list, not {type(output)}, line: {line}"
+                msg = f"Output must be a list, not {type(output)}, line: {line}"
+                assert isinstance(output, list), msg
                 new_lines.extend([line, MARKERS["warning"], *output])
                 output = None
             else:
