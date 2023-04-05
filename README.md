@@ -4,6 +4,13 @@
 
 The package is hosted on GitHub: [https://github.com/basnijholt/markdown-code-runner](https://github.com/basnijholt/markdown-code-runner)
 
+## :star: Features
+-  :rocket: Automatically execute code blocks within a Markdown file
+-  :eyes: Allows hidden code blocks (i.e. code blocks that are not displayed in the Markdown file)
+-  :snake: :shell: Works with Python and Bash code blocks
+-  :white_check_mark: Keeps the output of the code blocks up-to-date
+-  :octocat: Easily integrates with GitHub Actions
+
 ## :question: Problem Statement
 
 When creating Markdown files with code examples, it's essential to keep the output of these code snippets accurate and up-to-date. Manually updating the output can be time-consuming and error-prone, especially when working with large files or multiple collaborators.
