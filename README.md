@@ -457,7 +457,6 @@ Using a hidden code block:
 <!--     print(f"- {todo['title']} (User ID: {todo['userId']}, Completed: {todo['completed']})") -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-Output will appear here.
 <!-- OUTPUT:END -->
 ```
 Which is rendered as:
