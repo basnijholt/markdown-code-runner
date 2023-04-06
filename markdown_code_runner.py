@@ -74,7 +74,6 @@ MARKERS = {
     "skip": md_comment("CODE:SKIP"),
     "code:comment:python:start": md_comment("CODE:START"),
     "code:comment:bash:start": md_comment("CODE:BASH:START"),
-    "code:comment:file:start": md_comment("CODE:FILE:START"),
     "code:comment:end": md_comment("CODE:END"),
     "output:start": md_comment("OUTPUT:START"),
     "output:end": md_comment("OUTPUT:END"),
