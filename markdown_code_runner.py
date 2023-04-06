@@ -166,8 +166,8 @@ class ProcessingState:
 
     section: Literal[
         "normal",
-        "code:comment",
-        "code:backtick",
+        "code:comment:python",
+        "code:backtick:python",
         "code:backtick:bash",
         "output",
     ] = "normal"
@@ -183,11 +183,11 @@ class ProcessingState:
         if is_marker(line, "skip"):
             self.skip_code_block = True
         elif is_marker(line, "code:comment:python:start"):
-            self.section = "code:comment"
+            self.section = "code:comment:python"
         elif is_marker(line, "code:comment:bash:start"):
             self.section = "code:comment:bash"
         elif is_marker(line, "code:backticks:python:start"):
-            self.section = "code:backtick"
+            self.section = "code:backtick:python"
         elif is_marker(line, "code:backticks:bash:start"):
             self.section = "code:backtick:bash"
         elif is_marker(line, "code:backticks:file:start"):
