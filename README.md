@@ -249,6 +249,7 @@ on:
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
   update_readme:
@@ -274,6 +275,13 @@ jobs:
       - name: Install other Python dependencies
         run: |
           pip install pandas tabulate pytest matplotlib requests
+
+      # Rust is only needed for an example in our README.md
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
 
       - name: Run update-readme.py
         run: markdown-code-runner --verbose README.md
