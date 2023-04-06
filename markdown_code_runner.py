@@ -106,6 +106,7 @@ def is_marker(line: str, marker: str) -> bool:
 
 def remove_md_comment(commented_text: str) -> str:
     """Remove Markdown comment tags from a string."""
+    commented_text = commented_text.strip()
     if not (commented_text.startswith("<!-- ") and commented_text.endswith(" -->")):
         msg = f"Invalid Markdown comment format: {commented_text}"
         raise ValueError(msg)
