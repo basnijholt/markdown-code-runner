@@ -489,7 +489,7 @@ Which is rendered as:
 
 We can use `markdown-code-runner` to write Rust code to a file and then a hidden bash code block to run the code and display the output.
 
-The code below is actually executed, check out the [`README.md` in plain text](https://github.com/basnijholt/markdown-code-runner/blob/main/README.md?plain=1) to see how this works.
+The code below *is actually executed*, check out the [`README.md` in plain text](https://github.com/basnijholt/markdown-code-runner/blob/main/README.md?plain=1) to see how this works.
 
 ```rust markdown-code-runner filename=main.rs
 fn main() {
