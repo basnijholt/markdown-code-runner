@@ -42,6 +42,7 @@ This ensures that the displayed output is always in sync with the code, and cont
   - [:art: Idea 4: Generating Visualizations](#art-idea-4-generating-visualizations)
   - [:page_facing_up: Idea 5: Generating a table from CSV data](#page_facing_up-idea-5-generating-a-table-from-csv-data)
   - [:star: Idea 5: Displaying API data as a list](#star-idea-5-displaying-api-data-as-a-list)
+  - [:crab: Idea 6: Run a Rust program](#crab-idea-6-run-a-rust-program)
 - [:page_with_curl: License](#page_with_curl-license)
 - [:handshake: Contributing](#handshake-contributing)
 
