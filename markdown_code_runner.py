@@ -163,6 +163,25 @@ def _bold(text: str) -> str:
     return f"{bold}{text}{reset}"
 
 
+def extract_extra(line: str, marker: str) -> dict[str, str]:
+    """Extract extra key-value pairs from a line."""
+    # Get the marker pattern and search for the marker in the line
+    marker_pattern = PATTERNS[marker]
+    match = marker_pattern.search(line)
+
+    if match:
+        # Remove the matched marker from the line to get the remaining text
+        remaining_text = line[match.end() :].strip()
+
+        # Use a regex pattern to match key-value pairs in the remaining text
+        extra_pattern = re.compile(r"(\w+)\s*=\s*([^ =]+)")
+        extra_matches = extra_pattern.findall(remaining_text)
+
+        # Convert the matched key-value pairs to a dictionary
+        return dict(extra_matches)
+    return {}
+
+
 @dataclass
 class ProcessingState:
     """State of the processing of a Markdown file."""
@@ -180,6 +199,7 @@ class ProcessingState:
     skip_code_block: bool = False
     output: list[str] | None = None
     new_lines: list[str] = field(default_factory=list)
+    extra_section_options: dict[str, Any] = field(default_factory=dict)
 
     def process_line(self, line: str, *, verbose: bool = False) -> None:
         """Process a line of the Markdown file."""
@@ -198,6 +218,7 @@ class ProcessingState:
         else:
             for marker in MARKERS:
                 if marker.endswith(":start") and is_marker(line, marker):
+                    self.extra_section_options = extract_extra(line, marker)
                     self.section, _ = marker.rsplit(":", 1)
 
         if self.section != "output":
@@ -232,7 +253,7 @@ class ProcessingState:
     ) -> None:
         if is_marker(line, end_marker):
             if not self.skip_code_block:
-                output_file = None
+                output_file = self.extra_section_options.pop("filename", None)
                 _, language = self.section.rsplit(":", 1)
                 self.output = execute_code(
                     self.code,

@@ -12,6 +12,7 @@ from markdown_code_runner import (
     MARKERS,
     PATTERNS,
     execute_code,
+    extract_extra,
     main,
     markers_to_patterns,
     md_comment,
@@ -648,7 +649,7 @@ def test_write_to_file() -> None:
     # Test case 1 (backticks): Single code block
     input_lines = [
         "Some text",
-        "```rust markdown-code-runner filename=test.js",
+        "```rust markdown-code-runner filename=test.rs",
         "let a = 1;",
         'println!("a = {}", a);',
         "```",
@@ -659,13 +660,12 @@ def test_write_to_file() -> None:
     ]
     expected_output = [
         "Some text",
-        "```rust markdown-code-runner",
+        "```rust markdown-code-runner filename=test.rs",
         "let a = 1;",
         'println!("a = {}", a);',
         "```",
         MARKERS["output:start"],
         MARKERS["warning"],
-        "",
         MARKERS["output:end"],
         "More text",
     ]
@@ -687,3 +687,30 @@ def test_patterns() -> None:
     m = p.search(text)
     assert m is not None
     assert m.group("language") == "rust"
+
+
+@pytest.mark.parametrize(
+    ("line", "marker", "expected_result"),
+    [
+        (
+            "```javascript markdown-code-runner filename=test.js",
+            "code:backticks:file:start",
+            {"filename": "test.js"},
+        ),
+        (
+            "```python markdown-code-runner arg1=value1 arg2=value2",
+            "code:backticks:python:start",
+            {"arg1": "value1", "arg2": "value2"},
+        ),
+        (
+            "```bash markdown-code-runner key1=value1 key2=value2",
+            "code:backticks:bash:start",
+            {"key1": "value1", "key2": "value2"},
+        ),
+        ("```python markdown-code-runner", "code:backticks:python:start", {}),
+        ("This is a regular text line", "code:backticks:file:start", {}),
+    ],
+)
+def test_extract_extra(line: str, marker: str, expected_result: str) -> None:
+    """Test that the extract_extra function works as expected."""
+    assert extract_extra(line, marker) == expected_result
