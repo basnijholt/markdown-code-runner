@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 from pathlib import Path
 from unittest.mock import patch
 
@@ -9,8 +10,10 @@ import pytest
 
 from markdown_code_runner import (
     MARKERS,
+    PATTERNS,
     execute_code,
     main,
+    markers_to_patterns,
     md_comment,
     process_markdown,
     remove_md_comment,
@@ -30,7 +33,7 @@ def test_process_markdown() -> None:
     # Test case 1: Single code block
     input_lines = [
         "Some text",
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello, world!')"),
         MARKERS["code:comment:end"],
         "Which will procure the following output:",
@@ -41,7 +44,7 @@ def test_process_markdown() -> None:
     ]
     expected_output = [
         "Some text",
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello, world!')"),
         MARKERS["code:comment:end"],
         "Which will procure the following output:",
@@ -57,14 +60,14 @@ def test_process_markdown() -> None:
     # Test case 2: Two code blocks
     input_lines = [
         "Some text",
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello, world!')"),
         MARKERS["code:comment:end"],
         MARKERS["output:start"],
         "This content will be replaced",
         MARKERS["output:end"],
         "More text",
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello again!')"),
         MARKERS["code:comment:end"],
         MARKERS["output:start"],
@@ -73,7 +76,7 @@ def test_process_markdown() -> None:
     ]
     expected_output = [
         "Some text",
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello, world!')"),
         MARKERS["code:comment:end"],
         MARKERS["output:start"],
@@ -82,7 +85,7 @@ def test_process_markdown() -> None:
         "",
         MARKERS["output:end"],
         "More text",
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello again!')"),
         MARKERS["code:comment:end"],
         MARKERS["output:start"],
@@ -108,7 +111,7 @@ def test_process_markdown() -> None:
     input_lines = [
         "Some text",
         MARKERS["skip"],
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello, world!')"),
         MARKERS["code:comment:end"],
         MARKERS["output:start"],
@@ -123,14 +126,14 @@ def test_process_markdown() -> None:
     input_lines = [
         "Some text",
         MARKERS["skip"],
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello, world!')"),
         MARKERS["code:comment:end"],
         MARKERS["output:start"],
         "This content will be replaced",
         MARKERS["output:end"],
         "More text",
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello again!')"),
         MARKERS["code:comment:end"],
         MARKERS["output:start"],
@@ -140,14 +143,14 @@ def test_process_markdown() -> None:
     expected_output = [
         "Some text",
         MARKERS["skip"],
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello, world!')"),
         MARKERS["code:comment:end"],
         MARKERS["output:start"],
         "This content will be replaced",
         MARKERS["output:end"],
         "More text",
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello again!')"),
         MARKERS["code:comment:end"],
         MARKERS["output:start"],
@@ -406,7 +409,7 @@ def test_mix_md_and_triple_backticks() -> None:
         "This content will not be replaced because of skip marker",
         MARKERS["output:end"],
         # Md code block
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello, world!')"),
         MARKERS["code:comment:end"],
         MARKERS["output:start"],
@@ -446,7 +449,7 @@ def test_mix_md_and_triple_backticks() -> None:
         "This content will not be replaced because of skip marker",
         MARKERS["output:end"],
         # Md code block
-        MARKERS["code:comment:start"],
+        MARKERS["code:comment:python:start"],
         md_comment("print('Hello, world!')"),
         MARKERS["code:comment:end"],
         MARKERS["output:start"],
@@ -618,3 +621,69 @@ def test_bash_variables() -> None:
         "More text",
     ]
     assert_process(input_lines, expected_output)
+
+
+def test_marker_pattern() -> None:
+    """Test that all marker patterns match the expected text."""
+    patterns = markers_to_patterns()
+    for marker_key, pattern in patterns.items():
+        if marker_key == "code:backticks:file:start":
+            continue
+        for spaces in ["", "   "]:
+            test_text = f"{spaces}{MARKERS[marker_key]}"
+            match = re.search(pattern, test_text)
+            assert match is not None, f"No match found for {marker_key}"
+
+    marker_key = "code:backticks:file:start"
+    pattern = patterns[marker_key]
+    for spaces in ["", "   "]:
+        test_text = f"{spaces}```somelanguage markdown-code-runner"
+        match = re.search(pattern, test_text)
+        assert match is not None, f"No match found for {marker_key}, {match}"
+
+
+def test_write_to_file() -> None:
+    """Test that bash code is executed."""
+    print(PATTERNS)
+    # Test case 1 (backticks): Single code block
+    input_lines = [
+        "Some text",
+        "```rust markdown-code-runner filename=test.js",
+        "let a = 1;",
+        'println!("a = {}", a);',
+        "```",
+        MARKERS["output:start"],
+        "This content will be replaced",
+        MARKERS["output:end"],
+        "More text",
+    ]
+    expected_output = [
+        "Some text",
+        "```rust markdown-code-runner",
+        "let a = 1;",
+        'println!("a = {}", a);',
+        "```",
+        MARKERS["output:start"],
+        MARKERS["warning"],
+        "",
+        MARKERS["output:end"],
+        "More text",
+    ]
+    assert_process(input_lines, expected_output)
+
+    # Test case 2: test without output block
+
+
+def test_patterns() -> None:
+    """Test that all marker patterns match the expected text."""
+    p = re.compile(pattern=PATTERNS["code:backticks:file:start"])
+    text = "```python markdown-code-runner"
+    m = p.search(text)
+    assert m is None
+    text = "```javascript markdown-code-runner filename=test.js"
+    m = p.search(text)
+    assert m is not None
+    text = "```rust markdown-code-runner"
+    m = p.search(text)
+    assert m is not None
+    assert m.group("language") == "rust"

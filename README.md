@@ -129,9 +129,8 @@ To use `markdown-code-runner`, simply import the `update_markdown_file` function
 
 ```python
 from markdown_code_runner import update_markdown_file
-from pathlib import Path
 
-update_markdown_file(Path("path/to/your/markdown_file.md"))
+update_markdown_file("path/to/your/markdown_file.md")
 ```
 
 ## :book: Examples
