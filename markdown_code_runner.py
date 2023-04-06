@@ -99,7 +99,7 @@ PATTERNS = markers_to_patterns()
 def is_marker(line: str, marker: str) -> bool:
     """Check if a line is a specific marker."""
     m = re.search(PATTERNS[marker], line) is not None
-    if DEBUG and m:
+    if DEBUG and m:  # pragma: no cover
         print(f"Found marker {marker} in line {line}")
     return m
 

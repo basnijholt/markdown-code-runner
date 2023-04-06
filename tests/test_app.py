@@ -672,6 +672,35 @@ def test_write_to_file() -> None:
     assert_process(input_lines, expected_output)
 
     # Test case 2: test without output block
+    input_lines = [
+        "Some text",
+        "```rust markdown-code-runner filename=test.rs",
+        "let a = 1;",
+        'println!("a = {}", a);',
+        "```",
+        "More text",
+    ]
+    expected_output = [
+        "Some text",
+        "```rust markdown-code-runner filename=test.rs",
+        "let a = 1;",
+        'println!("a = {}", a);',
+        "```",
+        "More text",
+    ]
+    assert_process(input_lines, expected_output)
+
+    # Test missing filename
+    input_lines = [
+        "Some text",
+        "```rust markdown-code-runner",
+        "let a = 1;",
+        'println!("a = {}", a);',
+        "```",
+        "More text",
+    ]
+    with pytest.raises(ValueError, match="'output_file' must be specified"):
+        process_markdown(input_lines, verbose=True)
 
 
 def test_patterns() -> None:
