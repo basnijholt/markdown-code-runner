@@ -13,7 +13,7 @@ The package is hosted on GitHub: [https://github.com/basnijholt/markdown-code-ru
 - :white_check_mark: Keeps the output of the code blocks up-to-date
 - :octocat: Easily integrates with GitHub Actions
 - :tada: No external dependencies and works with Python 3.7+
-- :globe_with_meridians: Execute *all* languages by using the file code blocks and executing it with bash
+- :globe_with_meridians: Execute *all* languages by using the file code blocks and executing it with bash (see [Rust :crab: example](#crab-idea-6-run-a-rust-program))
 
 ## :question: Problem Statement
 
