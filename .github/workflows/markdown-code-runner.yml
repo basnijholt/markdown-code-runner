@@ -20,12 +20,6 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
       - name: Install markdown-code-runner
         run: |
           python -m pip install --upgrade pip
@@ -35,6 +29,13 @@ jobs:
       - name: Install other Python dependencies
         run: |
           pip install pandas tabulate pytest matplotlib requests
+
+      # Rust is only needed for an example in our README.md
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
 
       - name: Run update-readme.py
         run: markdown-code-runner --verbose README.md
