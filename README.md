@@ -281,7 +281,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          override: true
+          profile: minimal
 
       - name: Run update-readme.py
         run: markdown-code-runner --verbose README.md
