@@ -86,7 +86,7 @@ MARKERS = {
 
 def markers_to_patterns() -> dict[str, re.Pattern]:
     """Convert the markers to regular expressions."""
-    allow_spaces_before_text = r"^\s*"
+    allow_spaces_before_text = r"^(?P<spaces>\s*)"
     patterns = {}
     for key, value in MARKERS.items():
         patterns[key] = re.compile(allow_spaces_before_text + value, re.MULTILINE)
@@ -96,12 +96,12 @@ def markers_to_patterns() -> dict[str, re.Pattern]:
 PATTERNS = markers_to_patterns()
 
 
-def is_marker(line: str, marker: str) -> bool:
+def is_marker(line: str, marker: str) -> re.Match:
     """Check if a line is a specific marker."""
-    m = re.search(PATTERNS[marker], line) is not None
-    if DEBUG and m:  # pragma: no cover
+    match = re.search(PATTERNS[marker], line)
+    if DEBUG and match is not None:  # pragma: no cover
         print(f"Found marker {marker} in line {line}")
-    return m
+    return match
 
 
 def remove_md_comment(commented_text: str) -> str:
@@ -203,11 +203,11 @@ class ProcessingState:
 
     def process_line(self, line: str, *, verbose: bool = False) -> None:
         """Process a line of the Markdown file."""
-        if is_marker(line, "skip"):
+        if (match := is_marker(line, "skip")) is not None:
             self.skip_code_block = True
-        elif is_marker(line, "output:start"):
+        elif (match := is_marker(line, "output:start")) is not None:
             self._process_output_start(line)
-        elif is_marker(line, "output:end"):
+        elif (match := is_marker(line, "output:end")) is not None:
             self._process_output_end()
         elif self.section.startswith("code:comment"):
             self._process_comment_code(line, verbose=verbose)
@@ -217,7 +217,10 @@ class ProcessingState:
             self.original_output.append(line)
         else:
             for marker in MARKERS:
-                if marker.endswith(":start") and is_marker(line, marker):
+                if (
+                    marker.endswith(":start")
+                    and (match := is_marker(line, marker)) is not None
+                ):
                     self.extra_section_options = extract_extra(line, marker)
                     self.section, _ = marker.rsplit(":", 1)
 
@@ -251,7 +254,7 @@ class ProcessingState:
         remove_comment: bool = False,
         verbose: bool,
     ) -> None:
-        if is_marker(line, end_marker):
+        if (match := is_marker(line, end_marker)) is not None:
             if not self.skip_code_block:
                 output_file = self.extra_section_options.pop("filename", None)
                 _, language = self.section.rsplit(":", 1)
