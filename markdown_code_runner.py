@@ -77,7 +77,7 @@ MARKERS = {
     "code:comment:end": md_comment("CODE:END"),
     "output:start": md_comment("OUTPUT:START"),
     "output:end": md_comment("OUTPUT:END"),
-    "code:backticks:start": r"```(?P<language>\w+)\s+markdown-code-runner|(?P<key>\w+)=(?P<value>\S+)",
+    "code:backticks:start": r"```(?P<language>\w+)\s+markdown-code-runner",
     "code:backticks:end": "```",
 }
 
@@ -164,20 +164,24 @@ def _bold(text: str) -> str:
 
 
 def extract_extra(line: str) -> dict[str, str]:
-    """Extract extra key-value pairs from a line."""
-    pattern = PATTERNS["code:backticks:start"]
-    p = re.compile(pattern)
-    matches = p.finditer(line)
-    result = {}
-    for match in matches:
-        group_dict = match.groupdict()
-        language = group_dict.get("language")
-        key = group_dict.get("key")
-        value = group_dict.get("value")
-        if language:
-            result["language"] = language
-        elif key and value:
-            result[key] = value
+    """Extract extra information from a line."""
+    language_pattern = r"```(?P<language>\w+) markdown-code-runner"
+    extra_pattern = r"(?P<key>\w+)=(?P<value>\S+)"
+
+    language_match = re.search(language_pattern, line)
+    if not language_match:
+        return {}
+
+    language = language_match.group("language")
+    result = {"language": language}
+
+    extra_str = line[language_match.end() :]
+    extra_matches = re.finditer(extra_pattern, extra_str)
+
+    for match in extra_matches:
+        key, value = match.group("key"), match.group("value")
+        result[key] = value
+
     return result
 
 
@@ -217,6 +221,7 @@ class ProcessingState:
         else:
             for marker in MARKERS:
                 if marker.endswith(":start") and is_marker(line, marker):
+                    self.output = None
                     self.extra_section_options = extract_extra(line)
                     self.section, _ = marker.rsplit(":", 1)
 
@@ -278,6 +283,7 @@ class ProcessingState:
 
     def _process_backtick_code(self, line: str, *, verbose: bool) -> None:
         # All end backticks markers are the same
+        print(self.extra_section_options)
         language = self.extra_section_options["language"]
         self._process_code(line, "code:backticks:end", language, verbose=verbose)
 

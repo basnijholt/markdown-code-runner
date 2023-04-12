@@ -742,6 +742,10 @@ def test_patterns() -> None:
                 "arg3": "value3",
             },
         ),
+        (
+            "https://github.com/basnijholt/markdown-code-runner/blob/main/README.md?plain=1",
+            {},
+        ),
     ],
 )
 def test_extract_extra(line: str, expected_result: str) -> None:
