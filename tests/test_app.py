@@ -178,7 +178,7 @@ def test_remove_md_comment() -> None:
 def test_execute_code_block() -> None:
     """Test the execute_code function."""
     code = ["print('Hello, world!')"]
-    output = execute_code(code)
+    output = execute_code(code, language="python")
     expected_output = ["Hello, world!", ""]
     assert output == expected_output, f"Expected {expected_output}, got {output}"
 
@@ -679,7 +679,7 @@ def test_write_to_file() -> None:
         "```",
         "More text",
     ]
-    with pytest.raises(ValueError, match="'output_file' must be specified"):
+    with pytest.raises(ValueError, match="Specify 'output_file'"):
         process_markdown(input_lines, verbose=True)
 
 

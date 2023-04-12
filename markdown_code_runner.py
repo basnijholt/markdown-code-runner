@@ -114,7 +114,7 @@ def remove_md_comment(commented_text: str) -> str:
 def execute_code(
     code: list[str],
     context: dict[str, Any] | None = None,
-    language: Literal["python", "bash", "file"] = "python",  # type: ignore[name-defined]
+    language: Literal["python", "bash"] = None,  # type: ignore[name-defined]
     *,
     output_file: str | Path | None = None,
     verbose: bool = False,
@@ -123,11 +123,17 @@ def execute_code(
     if context is None:
         context = {}
     full_code = "\n".join(code)
+
     if verbose:
         print(_bold(f"\nExecuting code {language} block:"))
         print(f"\n{full_code}\n")
 
-    if language == "python":
+    if output_file is not None:
+        output_file = Path(output_file)
+        with output_file.open("w") as f:
+            f.write(full_code)
+        output = []
+    elif language == "python":
         with io.StringIO() as string, contextlib.redirect_stdout(string):
             exec(full_code, context)  # noqa: S102
             output = string.getvalue().split("\n")
@@ -139,17 +145,14 @@ def execute_code(
             shell=True,
         )
         output = result.stdout.split("\n")
-    elif language == "file":
-        if output_file is None:
-            msg = "'output_file' must be specified for language 'file'"
-            raise ValueError(msg)
-        output_file = Path(output_file)
-        with output_file.open("w") as f:
-            f.write(full_code)
-        output = []
+    else:
+        msg = "Specify 'output_file' for non-Python/Bash languages."
+        raise ValueError(msg)
+
     if verbose:
         print(_bold("Output:"))
         print(f"\n{output}\n")
+
     return output
 
 
@@ -246,6 +249,7 @@ class ProcessingState:
         self,
         line: str,
         end_marker: str,
+        language: Literal["python", "bash", "line"],
         *,
         remove_comment: bool = False,
         verbose: bool,
@@ -253,11 +257,6 @@ class ProcessingState:
         if (match := is_marker(line, end_marker)) is not None:
             if not self.skip_code_block:
                 output_file = self.extra_section_options.pop("filename", None)
-                _, language = self.section.rsplit(":", 1)
-                if language == "backticks":
-                    language = self.extra_section_options["language"]
-                    if language not in ("python", "bash"):
-                        language = "file"
                 self.output = execute_code(
                     self.code,
                     self.context,
@@ -271,16 +270,19 @@ class ProcessingState:
             self.code.append(remove_md_comment(line) if remove_comment else line)
 
     def _process_comment_code(self, line: str, *, verbose: bool) -> None:
+        _, language = self.section.rsplit(":", 1)
         self._process_code(
             line,
             "code:comment:end",
+            language,
             remove_comment=True,
             verbose=verbose,
         )
 
     def _process_backtick_code(self, line: str, *, verbose: bool) -> None:
         # All end backticks markers are the same
-        self._process_code(line, "code:backticks:end", verbose=verbose)
+        language = self.extra_section_options["language"]
+        self._process_code(line, "code:backticks:end", language, verbose=verbose)
 
 
 def process_markdown(content: list[str], *, verbose: bool = False) -> list[str]:
