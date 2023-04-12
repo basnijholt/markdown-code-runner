@@ -94,7 +94,7 @@ def markers_to_patterns() -> dict[str, re.Pattern]:
 PATTERNS = markers_to_patterns()
 
 
-def is_marker(line: str, marker: str) -> re.Match:
+def is_marker(line: str, marker: str) -> re.Match | None:
     """Check if a line is a specific marker."""
     match = re.search(PATTERNS[marker], line)
     if DEBUG and match is not None:  # pragma: no cover
@@ -163,7 +163,7 @@ def _bold(text: str) -> str:
     return f"{bold}{text}{reset}"
 
 
-def extract_extra(line: str):
+def extract_extra(line: str) -> dict[str, str]:
     """Extract extra key-value pairs from a line."""
     pattern = PATTERNS["code:backticks:start"]
     p = re.compile(pattern)
@@ -216,10 +216,7 @@ class ProcessingState:
             self.original_output.append(line)
         else:
             for marker in MARKERS:
-                if (
-                    marker.endswith(":start")
-                    and (match := is_marker(line, marker)) is not None
-                ):
+                if marker.endswith(":start") and is_marker(line, marker):
                     self.extra_section_options = extract_extra(line)
                     self.section, _ = marker.rsplit(":", 1)
 
@@ -249,12 +246,12 @@ class ProcessingState:
         self,
         line: str,
         end_marker: str,
-        language: Literal["python", "bash", "line"],
+        language: Literal["python", "bash", "line"],  # type: ignore[name-defined]
         *,
         remove_comment: bool = False,
         verbose: bool,
     ) -> None:
-        if (match := is_marker(line, end_marker)) is not None:
+        if is_marker(line, end_marker):
             if not self.skip_code_block:
                 output_file = self.extra_section_options.pop("filename", None)
                 self.output = execute_code(

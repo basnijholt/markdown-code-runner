@@ -688,12 +688,15 @@ def test_patterns() -> None:
     p = re.compile(pattern=PATTERNS["code:backticks:start"])
     text = "```python markdown-code-runner"
     m = p.search(text)
+    assert m is not None
     assert m.group("language") == "python"
     text = "```javascript markdown-code-runner filename=test.js"
     m = p.search(text)
+    assert m is not None
     assert m.group("language") == "javascript"
     text = "```rust markdown-code-runner"
     m = p.search(text)
+    assert m is not None
     assert m.group("language") == "rust"
 
 
@@ -714,16 +717,6 @@ def test_patterns() -> None:
         ),
         ("```python markdown-code-runner", {"language": "python"}),
         ("This is a regular text line", {}),
-    ],
-)
-def test_extract_extra(line: str, expected_result: str) -> None:
-    """Test that the extract_extra function works as expected."""
-    assert extract_extra(line) == expected_result
-
-
-@pytest.mark.parametrize(
-    ("test_case", "expected"),
-    [
         (
             "```javascript markdown-code-runner filename=test.js",
             {"language": "javascript", "filename": "test.js"},
@@ -751,6 +744,6 @@ def test_extract_extra(line: str, expected_result: str) -> None:
         ),
     ],
 )
-def test_extract_arguments(test_case, expected):
-    result = extract_extra(test_case)
-    assert result == expected
+def test_extract_extra(line: str, expected_result: str) -> None:
+    """Test that the extract_extra function works as expected."""
+    assert extract_extra(line) == expected_result
