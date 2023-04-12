@@ -223,6 +223,7 @@ class ProcessingState:
         else:
             for marker in MARKERS:
                 if marker.endswith(":start") and is_marker(line, marker):
+                    # reset output in case previous output wasn't displayed
                     self.output = None
                     self.backtick_options = _extract_backtick_options(line)
                     self.section, _ = marker.rsplit(":", 1)
