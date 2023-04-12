@@ -77,16 +77,14 @@ MARKERS = {
     "code:comment:end": md_comment("CODE:END"),
     "output:start": md_comment("OUTPUT:START"),
     "output:end": md_comment("OUTPUT:END"),
-    "code:backticks:python:start": "```python markdown-code-runner",
-    "code:backticks:bash:start": "```bash markdown-code-runner",
-    "code:backticks:file:start": r"```(?!python\b|bash\b)(?P<language>\w+)\b markdown-code-runner",
+    "code:backticks:start": r"```(?P<language>\w+)\smarkdown-code-runner",
     "code:backticks:end": "```",
 }
 
 
 def markers_to_patterns() -> dict[str, re.Pattern]:
     """Convert the markers to regular expressions."""
-    allow_spaces_before_text = r"^\s*"
+    allow_spaces_before_text = r"^(?P<spaces>\s*)"
     patterns = {}
     for key, value in MARKERS.items():
         patterns[key] = re.compile(allow_spaces_before_text + value, re.MULTILINE)
@@ -96,12 +94,12 @@ def markers_to_patterns() -> dict[str, re.Pattern]:
 PATTERNS = markers_to_patterns()
 
 
-def is_marker(line: str, marker: str) -> bool:
+def is_marker(line: str, marker: str) -> re.Match | None:
     """Check if a line is a specific marker."""
-    m = re.search(PATTERNS[marker], line) is not None
-    if DEBUG and m:  # pragma: no cover
+    match = re.search(PATTERNS[marker], line)
+    if DEBUG and match is not None:  # pragma: no cover
         print(f"Found marker {marker} in line {line}")
-    return m
+    return match
 
 
 def remove_md_comment(commented_text: str) -> str:
@@ -116,7 +114,7 @@ def remove_md_comment(commented_text: str) -> str:
 def execute_code(
     code: list[str],
     context: dict[str, Any] | None = None,
-    language: Literal["python", "bash", "file"] = "python",  # type: ignore[name-defined]
+    language: Literal["python", "bash"] = None,  # type: ignore[name-defined]
     *,
     output_file: str | Path | None = None,
     verbose: bool = False,
@@ -125,11 +123,17 @@ def execute_code(
     if context is None:
         context = {}
     full_code = "\n".join(code)
+
     if verbose:
         print(_bold(f"\nExecuting code {language} block:"))
         print(f"\n{full_code}\n")
 
-    if language == "python":
+    if output_file is not None:
+        output_file = Path(output_file)
+        with output_file.open("w") as f:
+            f.write(full_code)
+        output = []
+    elif language == "python":
         with io.StringIO() as string, contextlib.redirect_stdout(string):
             exec(full_code, context)  # noqa: S102
             output = string.getvalue().split("\n")
@@ -141,18 +145,14 @@ def execute_code(
             shell=True,
         )
         output = result.stdout.split("\n")
-    elif language == "file":
-        if output_file is None:
-            msg = "'output_file' must be specified for language 'file'"
-            raise ValueError(msg)
-        output_file = Path(output_file)
-        with output_file.open("w") as f:
-            f.write(full_code)
-        output = []
+    else:
+        msg = "Specify 'output_file' for non-Python/Bash languages."
+        raise ValueError(msg)
 
     if verbose:
         print(_bold("Output:"))
         print(f"\n{output}\n")
+
     return output
 
 
@@ -163,23 +163,26 @@ def _bold(text: str) -> str:
     return f"{bold}{text}{reset}"
 
 
-def extract_extra(line: str, marker: str) -> dict[str, str]:
-    """Extract extra key-value pairs from a line."""
-    # Get the marker pattern and search for the marker in the line
-    marker_pattern = PATTERNS[marker]
-    match = marker_pattern.search(line)
+def extract_extra(line: str) -> dict[str, str]:
+    """Extract extra information from a line."""
+    language_pattern = r"```(?P<language>\w+) markdown-code-runner"
+    extra_pattern = r"(?P<key>\w+)=(?P<value>\S+)"
 
-    if match:
-        # Remove the matched marker from the line to get the remaining text
-        remaining_text = line[match.end() :].strip()
+    language_match = re.search(language_pattern, line)
+    if not language_match:
+        return {}
 
-        # Use a regex pattern to match key-value pairs in the remaining text
-        extra_pattern = re.compile(r"(\w+)\s*=\s*([^ =]+)")
-        extra_matches = extra_pattern.findall(remaining_text)
+    language = language_match.group("language")
+    result = {"language": language}
 
-        # Convert the matched key-value pairs to a dictionary
-        return dict(extra_matches)
-    return {}
+    extra_str = line[language_match.end() :]
+    extra_matches = re.finditer(extra_pattern, extra_str)
+
+    for match in extra_matches:
+        key, value = match.group("key"), match.group("value")
+        result[key] = value
+
+    return result
 
 
 @dataclass
@@ -189,8 +192,8 @@ class ProcessingState:
     section: Literal[
         "normal",
         "code:comment:python",
-        "code:backtick:python",
-        "code:backtick:bash",
+        "code:backticks:python",
+        "code:backticks:bash",
         "output",
     ] = "normal"
     code: list[str] = field(default_factory=list)
@@ -211,14 +214,15 @@ class ProcessingState:
             self._process_output_end()
         elif self.section.startswith("code:comment"):
             self._process_comment_code(line, verbose=verbose)
-        elif self.section.startswith("code:backtick"):
+        elif self.section.startswith("code:backticks"):
             self._process_backtick_code(line, verbose=verbose)
         elif self.section == "output":
             self.original_output.append(line)
         else:
             for marker in MARKERS:
                 if marker.endswith(":start") and is_marker(line, marker):
-                    self.extra_section_options = extract_extra(line, marker)
+                    self.output = None
+                    self.extra_section_options = extract_extra(line)
                     self.section, _ = marker.rsplit(":", 1)
 
         if self.section != "output":
@@ -247,6 +251,7 @@ class ProcessingState:
         self,
         line: str,
         end_marker: str,
+        language: Literal["python", "bash", "line"],  # type: ignore[name-defined]
         *,
         remove_comment: bool = False,
         verbose: bool,
@@ -254,7 +259,6 @@ class ProcessingState:
         if is_marker(line, end_marker):
             if not self.skip_code_block:
                 output_file = self.extra_section_options.pop("filename", None)
-                _, language = self.section.rsplit(":", 1)
                 self.output = execute_code(
                     self.code,
                     self.context,
@@ -268,16 +272,20 @@ class ProcessingState:
             self.code.append(remove_md_comment(line) if remove_comment else line)
 
     def _process_comment_code(self, line: str, *, verbose: bool) -> None:
+        _, language = self.section.rsplit(":", 1)
         self._process_code(
             line,
             "code:comment:end",
+            language,
             remove_comment=True,
             verbose=verbose,
         )
 
     def _process_backtick_code(self, line: str, *, verbose: bool) -> None:
-        # All end backtick markers are the same
-        self._process_code(line, "code:backticks:end", verbose=verbose)
+        # All end backticks markers are the same
+        print(self.extra_section_options)
+        language = self.extra_section_options["language"]
+        self._process_code(line, "code:backticks:end", language, verbose=verbose)
 
 
 def process_markdown(content: list[str], *, verbose: bool = False) -> list[str]:

@@ -14,7 +14,6 @@ from markdown_code_runner import (
     execute_code,
     extract_extra,
     main,
-    markers_to_patterns,
     md_comment,
     process_markdown,
     remove_md_comment,
@@ -179,7 +178,7 @@ def test_remove_md_comment() -> None:
 def test_execute_code_block() -> None:
     """Test the execute_code function."""
     code = ["print('Hello, world!')"]
-    output = execute_code(code)
+    output = execute_code(code, language="python")
     expected_output = ["Hello, world!", ""]
     assert output == expected_output, f"Expected {expected_output}, got {output}"
 
@@ -624,25 +623,6 @@ def test_bash_variables() -> None:
     assert_process(input_lines, expected_output)
 
 
-def test_marker_pattern() -> None:
-    """Test that all marker patterns match the expected text."""
-    patterns = markers_to_patterns()
-    for marker_key, pattern in patterns.items():
-        if marker_key == "code:backticks:file:start":
-            continue
-        for spaces in ["", "   "]:
-            test_text = f"{spaces}{MARKERS[marker_key]}"
-            match = re.search(pattern, test_text)
-            assert match is not None, f"No match found for {marker_key}"
-
-    marker_key = "code:backticks:file:start"
-    pattern = patterns[marker_key]
-    for spaces in ["", "   "]:
-        test_text = f"{spaces}```somelanguage markdown-code-runner"
-        match = re.search(pattern, test_text)
-        assert match is not None, f"No match found for {marker_key}, {match}"
-
-
 def test_write_to_file() -> None:
     """Test that bash code is executed."""
     print(PATTERNS)
@@ -699,19 +679,52 @@ def test_write_to_file() -> None:
         "```",
         "More text",
     ]
-    with pytest.raises(ValueError, match="'output_file' must be specified"):
+    with pytest.raises(ValueError, match="Specify 'output_file'"):
         process_markdown(input_lines, verbose=True)
+
+
+def test_python_code_in_backticks_and_filename(tmp_path: Path) -> None:
+    """Test that python code in backticks is executed."""
+    # Test case 1: Single code block
+    fname = tmp_path / "test.py"
+    input_lines = [
+        "Some text",
+        f"```python markdown-code-runner filename={fname}",
+        "a = 1",
+        "print(a)",
+        "```",
+        "More text",
+        MARKERS["output:start"],
+        "This content will be replaced BY NO OUTPUT",
+        MARKERS["output:end"],
+    ]
+    expected_output = [
+        "Some text",
+        f"```python markdown-code-runner filename={fname}",
+        "a = 1",
+        "print(a)",
+        "```",
+        "More text",
+        MARKERS["output:start"],
+        MARKERS["warning"],
+        MARKERS["output:end"],
+    ]
+    assert_process(input_lines, expected_output)
+    with fname.open("r") as f:
+        assert f.read() == "\n".join(input_lines[2:4])
 
 
 def test_patterns() -> None:
     """Test that all marker patterns match the expected text."""
-    p = re.compile(pattern=PATTERNS["code:backticks:file:start"])
+    p = re.compile(pattern=PATTERNS["code:backticks:start"])
     text = "```python markdown-code-runner"
     m = p.search(text)
-    assert m is None
+    assert m is not None
+    assert m.group("language") == "python"
     text = "```javascript markdown-code-runner filename=test.js"
     m = p.search(text)
     assert m is not None
+    assert m.group("language") == "javascript"
     text = "```rust markdown-code-runner"
     m = p.search(text)
     assert m is not None
@@ -719,27 +732,53 @@ def test_patterns() -> None:
 
 
 @pytest.mark.parametrize(
-    ("line", "marker", "expected_result"),
+    ("line", "expected_result"),
     [
         (
             "```javascript markdown-code-runner filename=test.js",
-            "code:backticks:file:start",
-            {"filename": "test.js"},
+            {"language": "javascript", "filename": "test.js"},
         ),
         (
             "```python markdown-code-runner arg1=value1 arg2=value2",
-            "code:backticks:python:start",
-            {"arg1": "value1", "arg2": "value2"},
+            {"language": "python", "arg1": "value1", "arg2": "value2"},
         ),
         (
             "```bash markdown-code-runner key1=value1 key2=value2",
-            "code:backticks:bash:start",
-            {"key1": "value1", "key2": "value2"},
+            {"language": "bash", "key1": "value1", "key2": "value2"},
         ),
-        ("```python markdown-code-runner", "code:backticks:python:start", {}),
-        ("This is a regular text line", "code:backticks:file:start", {}),
+        ("```python markdown-code-runner", {"language": "python"}),
+        ("This is a regular text line", {}),
+        (
+            "```javascript markdown-code-runner filename=test.js",
+            {"language": "javascript", "filename": "test.js"},
+        ),
+        (
+            "```python markdown-code-runner arg=test.js",
+            {"language": "python", "arg": "test.js"},
+        ),
+        (
+            "```javascript markdown-code-runner filename=test.js arg2=1",
+            {"language": "javascript", "filename": "test.js", "arg2": "1"},
+        ),
+        (
+            "```python markdown-code-runner",
+            {"language": "python"},
+        ),
+        (
+            "```python markdown-code-runner arg1=value1 arg2=value2 arg3=value3",
+            {
+                "language": "python",
+                "arg1": "value1",
+                "arg2": "value2",
+                "arg3": "value3",
+            },
+        ),
+        (
+            "https://github.com/basnijholt/markdown-code-runner/blob/main/README.md?plain=1",
+            {},
+        ),
     ],
 )
-def test_extract_extra(line: str, marker: str, expected_result: str) -> None:
+def test_extract_extra(line: str, expected_result: str) -> None:
     """Test that the extract_extra function works as expected."""
-    assert extract_extra(line, marker) == expected_result
+    assert extract_extra(line) == expected_result
