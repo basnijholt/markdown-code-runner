@@ -683,6 +683,37 @@ def test_write_to_file() -> None:
         process_markdown(input_lines, verbose=True)
 
 
+def test_python_code_in_backticks_and_filename(tmp_path: Path) -> None:
+    """Test that python code in backticks is executed."""
+    # Test case 1: Single code block
+    fname = tmp_path / "test.py"
+    input_lines = [
+        "Some text",
+        f"```python markdown-code-runner filename={fname}",
+        "a = 1",
+        "print(a)",
+        "```",
+        "More text",
+        MARKERS["output:start"],
+        "This content will be replaced BY NO OUTPUT",
+        MARKERS["output:end"],
+    ]
+    expected_output = [
+        "Some text",
+        f"```python markdown-code-runner filename={fname}",
+        "a = 1",
+        "print(a)",
+        "```",
+        "More text",
+        MARKERS["output:start"],
+        MARKERS["warning"],
+        MARKERS["output:end"],
+    ]
+    assert_process(input_lines, expected_output)
+    with fname.open("r") as f:
+        assert f.read() == "\n".join(input_lines[2:4])
+
+
 def test_patterns() -> None:
     """Test that all marker patterns match the expected text."""
     p = re.compile(pattern=PATTERNS["code:backticks:start"])
