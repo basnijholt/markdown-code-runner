@@ -77,7 +77,7 @@ MARKERS = {
     "code:comment:end": md_comment("CODE:END"),
     "output:start": md_comment("OUTPUT:START"),
     "output:end": md_comment("OUTPUT:END"),
-    "code:backticks:start": r"```(?P<language>\w+)\s+markdown-code-runner",
+    "code:backticks:start": r"```(?P<language>\w+)\smarkdown-code-runner",
     "code:backticks:end": "```",
 }
 
