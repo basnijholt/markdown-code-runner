@@ -192,8 +192,8 @@ class ProcessingState:
     section: Literal[
         "normal",
         "code:comment:python",
-        "code:backticks:python",
-        "code:backticks:bash",
+        "code:comment:bash",
+        "code:backticks",
         "output",
     ] = "normal"
     code: list[str] = field(default_factory=list)
@@ -283,7 +283,6 @@ class ProcessingState:
 
     def _process_backtick_code(self, line: str, *, verbose: bool) -> None:
         # All end backticks markers are the same
-        print(self.extra_section_options)
         language = self.extra_section_options["language"]
         self._process_code(line, "code:backticks:end", language, verbose=verbose)
 
