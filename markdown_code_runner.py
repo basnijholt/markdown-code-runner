@@ -191,10 +191,12 @@ class ProcessingState:
 
     section: Literal[
         "normal",
+        "output",
+        # code:comment stores language in `section`
         "code:comment:python",
         "code:comment:bash",
+        # code:backticks store language in `backtick_options`
         "code:backticks",
-        "output",
     ] = "normal"
     code: list[str] = field(default_factory=list)
     original_output: list[str] = field(default_factory=list)
