@@ -221,15 +221,19 @@ class ProcessingState:
         elif self.section == "output":
             self.original_output.append(line)
         else:
-            for marker in MARKERS:
-                if marker.endswith(":start") and is_marker(line, marker):
-                    # reset output in case previous output wasn't displayed
-                    self.output = None
-                    self.backtick_options = _extract_backtick_options(line)
-                    self.section, _ = marker.rsplit(":", 1)
+            self._process_start_markers(line)
 
         if self.section != "output":
             self.new_lines.append(line)
+
+    def _process_start_markers(self, line: str) -> None:
+        for marker in MARKERS:
+            if marker.endswith(":start") and is_marker(line, marker):
+                # reset output in case previous output wasn't displayed
+                self.output = None
+                self.backtick_options = _extract_backtick_options(line)
+                self.section, _ = marker.rsplit(":", 1)
+                return
 
     def _process_output_start(self, line: str) -> None:
         self.section = "output"
