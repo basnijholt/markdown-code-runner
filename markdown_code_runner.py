@@ -62,6 +62,13 @@ __version__ = pkg_resources.get_distribution("markdown-code-runner").version
 DEBUG: bool = os.environ.get("DEBUG", "0") == "1"
 
 
+@dataclass
+class CodeBlock:
+    language: str
+    filename: str | None = None
+    extra_options: dict[str, str] = field(default_factory=dict)
+
+
 def md_comment(text: str) -> str:
     """Format a string as a Markdown comment."""
     return f"<!-- {text} -->"
@@ -163,14 +170,14 @@ def _bold(text: str) -> str:
     return f"{bold}{text}{reset}"
 
 
-def extract_extra(line: str) -> dict[str, str]:
+def extract_extra(line: str) -> CodeBlock | None:
     """Extract extra information from a line."""
     language_pattern = r"```(?P<language>\w+) markdown-code-runner"
     extra_pattern = r"(?P<key>\w+)=(?P<value>\S+)"
 
     language_match = re.search(language_pattern, line)
     if not language_match:
-        return {}
+        return None
 
     language = language_match.group("language")
     result = {"language": language}
@@ -182,7 +189,11 @@ def extract_extra(line: str) -> dict[str, str]:
         key, value = match.group("key"), match.group("value")
         result[key] = value
 
-    return result
+    return CodeBlock(
+        language,
+        filename=result.pop("filename", None),
+        extra_options=result,
+    )
 
 
 @dataclass
@@ -202,7 +213,7 @@ class ProcessingState:
     skip_code_block: bool = False
     output: list[str] | None = None
     new_lines: list[str] = field(default_factory=list)
-    extra_section_options: dict[str, Any] = field(default_factory=dict)
+    extra_section_options: CodeBlock | None = None
 
     def process_line(self, line: str, *, verbose: bool = False) -> None:
         """Process a line of the Markdown file."""
@@ -224,6 +235,7 @@ class ProcessingState:
                     self.output = None
                     self.extra_section_options = extract_extra(line)
                     self.section, _ = marker.rsplit(":", 1)
+                    print(self.section)
 
         if self.section != "output":
             self.new_lines.append(line)
@@ -258,7 +270,7 @@ class ProcessingState:
     ) -> None:
         if is_marker(line, end_marker):
             if not self.skip_code_block:
-                output_file = self.extra_section_options.pop("filename", None)
+                output_file = self.extra_section_options.filename
                 self.output = execute_code(
                     self.code,
                     self.context,
@@ -284,7 +296,7 @@ class ProcessingState:
     def _process_backtick_code(self, line: str, *, verbose: bool) -> None:
         # All end backticks markers are the same
         print(self.extra_section_options)
-        language = self.extra_section_options["language"]
+        language = self.extra_section_options.language
         self._process_code(line, "code:backticks:end", language, verbose=verbose)
 
 

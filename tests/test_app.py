@@ -11,6 +11,7 @@ import pytest
 from markdown_code_runner import (
     MARKERS,
     PATTERNS,
+    CodeBlock,
     execute_code,
     extract_extra,
     main,
@@ -736,49 +737,67 @@ def test_patterns() -> None:
     [
         (
             "```javascript markdown-code-runner filename=test.js",
-            {"language": "javascript", "filename": "test.js"},
+            CodeBlock(
+                language="javascript",
+                filename="test.js",
+            ),
         ),
         (
             "```python markdown-code-runner arg1=value1 arg2=value2",
-            {"language": "python", "arg1": "value1", "arg2": "value2"},
+            CodeBlock(
+                language="python",
+                extra_options={"arg1": "value1", "arg2": "value2"},
+            ),
         ),
         (
             "```bash markdown-code-runner key1=value1 key2=value2",
-            {"language": "bash", "key1": "value1", "key2": "value2"},
+            CodeBlock(
+                language="bash",
+                extra_options={"key1": "value1", "key2": "value2"},
+            ),
         ),
-        ("```python markdown-code-runner", {"language": "python"}),
-        ("This is a regular text line", {}),
+        ("```python markdown-code-runner", CodeBlock(language="python")),
+        ("This is a regular text line", None),
         (
             "```javascript markdown-code-runner filename=test.js",
-            {"language": "javascript", "filename": "test.js"},
+            CodeBlock(
+                language="javascript",
+                filename="test.js",
+            ),
         ),
         (
             "```python markdown-code-runner arg=test.js",
-            {"language": "python", "arg": "test.js"},
+            CodeBlock(language="python", extra_options={"arg": "test.js"}),
         ),
         (
             "```javascript markdown-code-runner filename=test.js arg2=1",
-            {"language": "javascript", "filename": "test.js", "arg2": "1"},
+            CodeBlock(
+                language="javascript",
+                filename="test.js",
+                extra_options={"arg2": "1"},
+            ),
         ),
         (
             "```python markdown-code-runner",
-            {"language": "python"},
+            CodeBlock(language="python"),
         ),
         (
             "```python markdown-code-runner arg1=value1 arg2=value2 arg3=value3",
-            {
-                "language": "python",
-                "arg1": "value1",
-                "arg2": "value2",
-                "arg3": "value3",
-            },
+            CodeBlock(
+                language="python",
+                extra_options={"arg1": "value1", "arg2": "value2", "arg3": "value3"},
+            ),
         ),
         (
             "https://github.com/basnijholt/markdown-code-runner/blob/main/README.md?plain=1",
-            {},
+            None,
         ),
     ],
 )
-def test_extract_extra(line: str, expected_result: str) -> None:
+def test_extract_extra(line: str, expected_result: CodeBlock) -> None:
     """Test that the extract_extra function works as expected."""
-    assert extract_extra(line) == expected_result
+    result = extract_extra(line)
+    if result is not None:
+        assert result == expected_result
+    else:
+        assert expected_result is None
