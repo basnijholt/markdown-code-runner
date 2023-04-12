@@ -14,7 +14,6 @@ from markdown_code_runner import (
     execute_code,
     extract_extra,
     main,
-    markers_to_patterns,
     md_comment,
     process_markdown,
     remove_md_comment,
@@ -624,25 +623,6 @@ def test_bash_variables() -> None:
     assert_process(input_lines, expected_output)
 
 
-def test_marker_pattern() -> None:
-    """Test that all marker patterns match the expected text."""
-    patterns = markers_to_patterns()
-    for marker_key, pattern in patterns.items():
-        if marker_key == "code:backticks:file:start":
-            continue
-        for spaces in ["", "   "]:
-            test_text = f"{spaces}{MARKERS[marker_key]}"
-            match = re.search(pattern, test_text)
-            assert match is not None, f"No match found for {marker_key}"
-
-    marker_key = "code:backticks:file:start"
-    pattern = patterns[marker_key]
-    for spaces in ["", "   "]:
-        test_text = f"{spaces}```somelanguage markdown-code-runner"
-        match = re.search(pattern, test_text)
-        assert match is not None, f"No match found for {marker_key}, {match}"
-
-
 def test_write_to_file() -> None:
     """Test that bash code is executed."""
     print(PATTERNS)
@@ -705,41 +685,72 @@ def test_write_to_file() -> None:
 
 def test_patterns() -> None:
     """Test that all marker patterns match the expected text."""
-    p = re.compile(pattern=PATTERNS["code:backticks:file:start"])
+    p = re.compile(pattern=PATTERNS["code:backticks:start"])
     text = "```python markdown-code-runner"
     m = p.search(text)
-    assert m is None
+    assert m.group("language") == "python"
     text = "```javascript markdown-code-runner filename=test.js"
     m = p.search(text)
-    assert m is not None
+    assert m.group("language") == "javascript"
     text = "```rust markdown-code-runner"
     m = p.search(text)
-    assert m is not None
     assert m.group("language") == "rust"
 
 
 @pytest.mark.parametrize(
-    ("line", "marker", "expected_result"),
+    ("line", "expected_result"),
     [
         (
             "```javascript markdown-code-runner filename=test.js",
-            "code:backticks:file:start",
-            {"filename": "test.js"},
+            {"language": "javascript", "filename": "test.js"},
         ),
         (
             "```python markdown-code-runner arg1=value1 arg2=value2",
-            "code:backticks:python:start",
-            {"arg1": "value1", "arg2": "value2"},
+            {"language": "python", "arg1": "value1", "arg2": "value2"},
         ),
         (
             "```bash markdown-code-runner key1=value1 key2=value2",
-            "code:backticks:bash:start",
-            {"key1": "value1", "key2": "value2"},
+            {"language": "bash", "key1": "value1", "key2": "value2"},
         ),
-        ("```python markdown-code-runner", "code:backticks:python:start", {}),
-        ("This is a regular text line", "code:backticks:file:start", {}),
+        ("```python markdown-code-runner", {"language": "python"}),
+        ("This is a regular text line", {}),
     ],
 )
-def test_extract_extra(line: str, marker: str, expected_result: str) -> None:
+def test_extract_extra(line: str, expected_result: str) -> None:
     """Test that the extract_extra function works as expected."""
-    assert extract_extra(line, marker) == expected_result
+    assert extract_extra(line) == expected_result
+
+
+@pytest.mark.parametrize(
+    ("test_case", "expected"),
+    [
+        (
+            "```javascript markdown-code-runner filename=test.js",
+            {"language": "javascript", "filename": "test.js"},
+        ),
+        (
+            "```python markdown-code-runner arg=test.js",
+            {"language": "python", "arg": "test.js"},
+        ),
+        (
+            "```javascript markdown-code-runner filename=test.js arg2=1",
+            {"language": "javascript", "filename": "test.js", "arg2": "1"},
+        ),
+        (
+            "```python markdown-code-runner",
+            {"language": "python"},
+        ),
+        (
+            "```python markdown-code-runner arg1=value1 arg2=value2 arg3=value3",
+            {
+                "language": "python",
+                "arg1": "value1",
+                "arg2": "value2",
+                "arg3": "value3",
+            },
+        ),
+    ],
+)
+def test_extract_arguments(test_case, expected):
+    result = extract_extra(test_case)
+    assert result == expected
