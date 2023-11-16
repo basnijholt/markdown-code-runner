@@ -44,8 +44,8 @@ import io
 import os
 import re
 import subprocess
+import sys
 from dataclasses import dataclass, field
-from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -55,10 +55,19 @@ if TYPE_CHECKING:
     except ImportError:
         from typing_extensions import Literal
 
-try:
-    __version__ = version("markdown-code-runner")
-except PackageNotFoundError:  # pragma: no cover
-    __version__ = "unknown"
+
+if sys.version_info >= (3, 8):  # pragma: no cover
+    from importlib.metadata import PackageNotFoundError, version
+
+    try:
+        __version__ = version("markdown-code-runner")
+    except PackageNotFoundError:
+        __version__ = "unknown"
+else:  # pragma: no cover
+    import pkg_resources
+
+    __version__ = pkg_resources.get_distribution("markdown-code-runner").version
+
 
 DEBUG: bool = os.environ.get("DEBUG", "0") == "1"
 
