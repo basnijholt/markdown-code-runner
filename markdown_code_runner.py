@@ -57,7 +57,7 @@ if TYPE_CHECKING:
 
 try:
     __version__ = version("markdown-code-runner")
-except PackageNotFoundError:
+except PackageNotFoundError:  # pragma: no cover
     __version__ = "unknown"
 
 DEBUG: bool = os.environ.get("DEBUG", "0") == "1"
