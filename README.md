@@ -1,5 +1,7 @@
 # :rocket: Markdown Code Runner
 
+![](https://media.githubusercontent.com/media/basnijholt/nijho.lt/main/content/project/markdown-code-runner/featured.jpg)
+
 `markdown-code-runner` is a Python package that automatically executes code blocks within a Markdown file, including hidden code blocks, and updates the output in-place.
 This package is particularly useful for maintaining Markdown files with embedded code snippets, ensuring that the output displayed is up-to-date and accurate.
 It also enables the generation of content such as tables, plots, and other visualizations directly from the code.
