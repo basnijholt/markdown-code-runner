@@ -1,4 +1,5 @@
 """Test the markdown_code_runner app."""
+
 from __future__ import annotations
 
 import argparse
@@ -749,20 +750,12 @@ def test_patterns() -> None:
         ("```python markdown-code-runner", {"language": "python"}),
         ("This is a regular text line", {}),
         (
-            "```javascript markdown-code-runner filename=test.js",
-            {"language": "javascript", "filename": "test.js"},
-        ),
-        (
             "```python markdown-code-runner arg=test.js",
             {"language": "python", "arg": "test.js"},
         ),
         (
             "```javascript markdown-code-runner filename=test.js arg2=1",
             {"language": "javascript", "filename": "test.js", "arg2": "1"},
-        ),
-        (
-            "```python markdown-code-runner",
-            {"language": "python"},
         ),
         (
             "```python markdown-code-runner arg1=value1 arg2=value2 arg3=value3",

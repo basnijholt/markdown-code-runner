@@ -35,6 +35,7 @@ You can also run bash code blocks:
 echo "Hello, world!"
 ```
 Which will similarly print the output of the code block between next to the output markers.
+
 """
 
 from __future__ import annotations
@@ -134,11 +135,12 @@ def execute_code(
             exec(full_code, context)  # noqa: S102
             output = string.getvalue().split("\n")
     elif language == "bash":
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S602
             full_code,
             capture_output=True,
             text=True,
             shell=True,
+            check=False,
         )
         output = result.stdout.split("\n")
     else:
@@ -304,6 +306,7 @@ def process_markdown(content: list[str], *, verbose: bool = False) -> list[str]:
     -------
     list[str]
         A modified list of Markdown-formatted strings with code block output inserted.
+
     """
     assert isinstance(content, list), "Input must be a list"
     state = ProcessingState()
