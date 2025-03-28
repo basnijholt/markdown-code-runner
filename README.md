@@ -266,17 +266,20 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: "3.x"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Install markdown-code-runner
         run: |
-          python -m pip install --upgrade pip
-          pip install markdown-code-runner
+          uv venv
+          uv pip install markdown-code-runner
 
       # Install dependencies you're using in your README.md
       - name: Install other Python dependencies
         run: |
-          pip install pandas tabulate pytest matplotlib requests
+          uv pip install pandas tabulate pytest matplotlib requests
 
       # Rust is only needed for an example in our README.md
       - name: Set up Rust
@@ -286,7 +289,7 @@ jobs:
           profile: minimal
 
       - name: Run update-readme.py
-        run: markdown-code-runner --verbose README.md
+        run: uv run markdown-code-runner --verbose README.md
 
       - name: Commit updated README.md
         id: commit
@@ -339,15 +342,14 @@ usage: markdown-code-runner [-h] [-o OUTPUT] [-d] [-v] input
 Automatically update Markdown files with code block output.
 
 positional arguments:
-  input                 Path to the input Markdown file.
+  input                Path to the input Markdown file.
 
 options:
-  -h, --help            show this help message and exit
-  -o OUTPUT, --output OUTPUT
-                        Path to the output Markdown file. (default: overwrite
-                        input file)
-  -d, --verbose         Enable debugging mode (default: False)
-  -v, --version         show program's version number and exit
+  -h, --help           show this help message and exit
+  -o, --output OUTPUT  Path to the output Markdown file. (default: overwrite
+                       input file)
+  -d, --verbose        Enable debugging mode (default: False)
+  -v, --version        show program's version number and exit
 ```
 
 <!-- OUTPUT:END -->
