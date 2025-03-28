@@ -6,10 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "markdown-code-runner"
 description = "Automatically execute code blocks within a Markdown file and update the output in-place"
 authors = [{ name = "Bas Nijholt", email = "bas@nijho.lt" }]
-dependencies = [
-    "typing-extensions; python_version < '3.8'",
-]
-requires-python = ">=3.7"
+dependencies = []
+requires-python = ">=3.9"
 dynamic = ["version"]
 
 [project.readme]
@@ -51,7 +49,7 @@ line_length = 88
 
 [tool.ruff]
 line-length = 150
-target-version = "py37"
+target-version = "py39"
 select = ["ALL"]
 ignore = [
     "T20",     # flake8-print
@@ -73,4 +71,4 @@ ignore = [
 max-complexity = 18
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.9"
