@@ -282,11 +282,7 @@ jobs:
           uv pip install pandas tabulate pytest matplotlib requests
 
       # Rust is only needed for an example in our README.md
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Run update-readme.py
         run: uv run markdown-code-runner --verbose README.md
