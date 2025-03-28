@@ -36,6 +36,7 @@ echo "Hello, world!"
 ```
 Which will similarly print the output of the code block between next to the output markers.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -44,30 +45,15 @@ import io
 import os
 import re
 import subprocess
-import sys
 from dataclasses import dataclass, field
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any, Literal
 
-if TYPE_CHECKING:
-    try:
-        from typing import Literal  # type: ignore[attr-defined]
-    except ImportError:
-        from typing_extensions import Literal
-
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from importlib.metadata import PackageNotFoundError, version
-
-    try:
-        __version__ = version("markdown-code-runner")
-    except PackageNotFoundError:
-        __version__ = "unknown"
-else:  # pragma: no cover
-    import pkg_resources
-
-    __version__ = pkg_resources.get_distribution("markdown-code-runner").version
-
+try:
+    __version__ = version("markdown-code-runner")
+except PackageNotFoundError:  # pragma: no cover
+    __version__ = "unknown"
 
 DEBUG: bool = os.environ.get("DEBUG", "0") == "1"
 
@@ -124,7 +110,7 @@ def remove_md_comment(commented_text: str) -> str:
 def execute_code(
     code: list[str],
     context: dict[str, Any] | None = None,
-    language: Literal["python", "bash"] = None,  # type: ignore[name-defined]
+    language: Literal["python", "bash"] | None = None,  # type: ignore[name-defined]
     *,
     output_file: str | Path | None = None,
     verbose: bool = False,
@@ -242,7 +228,7 @@ class ProcessingState:
                 # reset output in case previous output wasn't displayed
                 self.output = None
                 self.backtick_options = _extract_backtick_options(line)
-                self.section, _ = marker.rsplit(":", 1)
+                self.section, _ = marker.rsplit(":", 1)  # type: ignore[assignment]
                 return
 
     def _process_output_start(self, line: str) -> None:
@@ -268,7 +254,7 @@ class ProcessingState:
         self,
         line: str,
         end_marker: str,
-        language: str,
+        language: Literal["python", "bash"],
         *,
         remove_comment: bool = False,
         verbose: bool,
@@ -293,7 +279,7 @@ class ProcessingState:
         self._process_code(
             line,
             "code:comment:end",
-            language,
+            language,  # type: ignore[arg-type]
             remove_comment=True,
             verbose=verbose,
         )
