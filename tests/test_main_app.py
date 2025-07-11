@@ -23,9 +23,9 @@ from markdown_code_runner import (
 TEST_FOLDER = Path(__file__).parent
 
 
-def assert_process(input_lines: list[str], expected_output: list[str]) -> None:
+def assert_process(input_lines: list[str], expected_output: list[str], *, backtick_standardize: bool = False) -> None:
     """Assert that the process_markdown function returns the expected output."""
-    output = process_markdown(input_lines, verbose=True)
+    output = process_markdown(input_lines, verbose=True, backtick_standardize=backtick_standardize)
     assert output == expected_output, f"Expected\n{expected_output}\ngot\n{output}"
 
 
@@ -56,7 +56,7 @@ def test_process_markdown() -> None:
         MARKERS["output:end"],
         "More text",
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
     # Test case 2: Two code blocks
     input_lines = [
@@ -95,7 +95,7 @@ def test_process_markdown() -> None:
         "",
         MARKERS["output:end"],
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
     # Test case 3: No code blocks
     input_lines = [
@@ -106,7 +106,7 @@ def test_process_markdown() -> None:
         "Some text",
         "More text",
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
     # Test case 4: Single code block with skip marker
     input_lines = [
@@ -121,7 +121,7 @@ def test_process_markdown() -> None:
         "More text",
     ]
     expected_output = input_lines
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
     # Test case 5: Skip marker at first code block, execute second code block
     input_lines = [
@@ -160,7 +160,7 @@ def test_process_markdown() -> None:
         "",
         MARKERS["output:end"],
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
 
 def test_remove_md_comment() -> None:
@@ -186,9 +186,9 @@ def test_execute_code_block() -> None:
 
 def test_main_no_arguments(tmp_path: Path) -> None:
     """Test the main function with no arguments."""
-    test_filepath = TEST_FOLDER / "test.md"
+    test_filepath = TEST_FOLDER / "test_main_app.md"
     output_filepath = tmp_path / "output.md"
-    expected_output_filepath = TEST_FOLDER / "test_expected_output.md"
+    expected_output_filepath = TEST_FOLDER / "test_main_app_expected_output.md"
 
     with patch(
         "argparse.ArgumentParser.parse_args",
@@ -196,6 +196,8 @@ def test_main_no_arguments(tmp_path: Path) -> None:
             input=test_filepath,
             output=None,
             verbose=False,
+            backtick_standardize=False,
+            force_overwrite=False,
         ),
     ):
         main()
@@ -206,9 +208,9 @@ def test_main_no_arguments(tmp_path: Path) -> None:
 
 def test_main_filepath_argument(tmp_path: Path) -> None:
     """Test the main function with a filepath argument."""
-    test_filepath = TEST_FOLDER / "test.md"
+    test_filepath = TEST_FOLDER / "test_main_app.md"
     output_filepath = tmp_path / "output.md"
-    expected_output_filepath = TEST_FOLDER / "test_expected_output.md"
+    expected_output_filepath = TEST_FOLDER / "test_main_app_expected_output.md"
 
     with patch(
         "argparse.ArgumentParser.parse_args",
@@ -216,6 +218,8 @@ def test_main_filepath_argument(tmp_path: Path) -> None:
             input=test_filepath,
             output=str(output_filepath),
             verbose=False,
+            backtick_standardize=False,
+            force_overwrite=False,
         ),
     ):
         main()
@@ -226,9 +230,9 @@ def test_main_filepath_argument(tmp_path: Path) -> None:
 
 def test_main_debug_mode(capfd: pytest.CaptureFixture, tmp_path: Path) -> None:
     """Test the main function with verbose mode enabled."""
-    test_filepath = TEST_FOLDER / "test.md"
+    test_filepath = TEST_FOLDER / "test_main_app.md"
     output_filepath = tmp_path / "output.md"
-    expected_output_filepath = TEST_FOLDER / "test_expected_output.md"
+    expected_output_filepath = TEST_FOLDER / "test_main_app_expected_output.md"
 
     with patch(
         "argparse.ArgumentParser.parse_args",
@@ -236,6 +240,8 @@ def test_main_debug_mode(capfd: pytest.CaptureFixture, tmp_path: Path) -> None:
             input=test_filepath,
             output=str(output_filepath),
             verbose=True,
+            backtick_standardize=False,
+            force_overwrite=False,
         ),
     ):
         main()
@@ -273,7 +279,7 @@ def test_triple_backticks() -> None:
         MARKERS["output:end"],
         "More text",
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
     # Test case 2: Two code blocks
     input_lines = [
@@ -312,7 +318,7 @@ def test_triple_backticks() -> None:
         "",
         MARKERS["output:end"],
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
     # Test case 3: No code blocks
     input_lines = [
@@ -323,7 +329,7 @@ def test_triple_backticks() -> None:
         "Some text",
         "More text",
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
     # Test case 4: Single code block with skip marker
     input_lines = [
@@ -338,7 +344,7 @@ def test_triple_backticks() -> None:
         "More text",
     ]
     expected_output = input_lines
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
     # Test case 5: Skip marker at first code block, execute second code block
     input_lines = [
@@ -377,7 +383,7 @@ def test_triple_backticks() -> None:
         "",
         MARKERS["output:end"],
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
 
 def test_mix_md_and_triple_backticks() -> None:
@@ -460,7 +466,7 @@ def test_mix_md_and_triple_backticks() -> None:
         MARKERS["output:end"],
         "More text",
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
 
 def test_preserve_variables_between_code_blocks() -> None:
@@ -503,7 +509,7 @@ def test_preserve_variables_between_code_blocks() -> None:
         "",
         MARKERS["output:end"],
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
 
 def test_two_code_blocks_but_first_without_output() -> None:
@@ -538,7 +544,7 @@ def test_two_code_blocks_but_first_without_output() -> None:
         "",
         MARKERS["output:end"],
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
 
 def test_bash() -> None:
@@ -566,7 +572,7 @@ def test_bash() -> None:
         MARKERS["output:end"],
         "More text",
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
     # Test case 1 (hidden): Single code block
     input_lines = [
@@ -591,7 +597,7 @@ def test_bash() -> None:
         MARKERS["output:end"],
         "More text",
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
 
 def test_bash_variables() -> None:
@@ -621,7 +627,7 @@ def test_bash_variables() -> None:
         MARKERS["output:end"],
         "More text",
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
 
 def test_write_to_file() -> None:
@@ -650,7 +656,7 @@ def test_write_to_file() -> None:
         MARKERS["output:end"],
         "More text",
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
     # Test case 2: test without output block
     input_lines = [
@@ -669,7 +675,7 @@ def test_write_to_file() -> None:
         "```",
         "More text",
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
 
     # Test missing filename
     input_lines = [
@@ -710,7 +716,7 @@ def test_python_code_in_backticks_and_filename(tmp_path: Path) -> None:
         MARKERS["warning"],
         MARKERS["output:end"],
     ]
-    assert_process(input_lines, expected_output)
+    assert_process(input_lines, expected_output, backtick_standardize=False)
     with fname.open("r") as f:
         assert f.read() == "\n".join(input_lines[2:4])
 
