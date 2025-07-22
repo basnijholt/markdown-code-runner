@@ -34,7 +34,7 @@ You can also run bash code blocks:
 ```bash markdown-code-runner
 echo "Hello, world!"
 ```
-Which will similarly print the output of the code block between next to the output markers.
+Which will similarly print the output of the code block between the next output markers.
 
 """
 
@@ -163,22 +163,17 @@ def _bold(text: str) -> str:
 
 def _extract_backtick_options(line: str) -> dict[str, str]:
     """Extract extra information from a line."""
-    if "```" not in line:
+    match = re.search(r"```(?P<language>\w+)", line)
+    if not match:
         return {}
-    language_pattern = r"```(?P<language>\w+) markdown-code-runner"
-    extra_pattern = r"(?P<key>\w+)=(?P<value>\S+)"
 
-    language_match = re.search(language_pattern, line)
-    assert language_match is not None
-    language = language_match.group("language")
-    result = {"language": language}
+    result = {"language": match.group("language")}
 
-    extra_str = line[language_match.end() :]
-    extra_matches = re.finditer(extra_pattern, extra_str)
-
-    for match in extra_matches:
-        key, value = match.group("key"), match.group("value")
-        result[key] = value
+    # Extract options after markdown-code-runner
+    if "markdown-code-runner" in line:
+        extra_str = line[match.end() :]
+        for option_match in re.finditer(r"(?P<key>\w+)=(?P<value>\S+)", extra_str):
+            result[option_match.group("key")] = option_match.group("value")
 
     return result
 
@@ -203,6 +198,7 @@ class ProcessingState:
     output: list[str] | None = None
     new_lines: list[str] = field(default_factory=list)
     backtick_options: dict[str, Any] = field(default_factory=dict)
+    backtick_standardize: bool = True
 
     def process_line(self, line: str, *, verbose: bool = False) -> None:
         """Process a line of the Markdown file."""
@@ -219,19 +215,34 @@ class ProcessingState:
         elif self.section == "output":
             self.original_output.append(line)
         else:
-            self._process_start_markers(line)
+            processed_line = self._process_start_markers(line, verbose=verbose)
+            if processed_line is not None:
+                line = processed_line
 
         if self.section != "output":
             self.new_lines.append(line)
 
-    def _process_start_markers(self, line: str) -> None:
-        for marker in MARKERS:
-            if marker.endswith(":start") and is_marker(line, marker):
+    def _process_start_markers(
+        self,
+        line: str,
+        verbose: bool = False,  # noqa: FBT001, FBT002, ARG002
+    ) -> str | None:
+        for marker_name in MARKERS:
+            if marker_name.endswith(":start") and is_marker(line, marker_name):
                 # reset output in case previous output wasn't displayed
                 self.output = None
                 self.backtick_options = _extract_backtick_options(line)
-                self.section, _ = marker.rsplit(":", 1)  # type: ignore[assignment]
-                return
+                self.section, _ = marker_name.rsplit(":", 1)  # type: ignore[assignment]
+
+                # Standardize backticks if needed
+                if (
+                    marker_name == "code:backticks:start"
+                    and self.backtick_standardize
+                    and "markdown-code-runner" in line
+                ):
+                    return re.sub(r"\smarkdown-code-runner.*", "", line)
+                return line
+        return None
 
     def _process_output_start(self, line: str) -> None:
         self.section = "output"
@@ -292,7 +303,12 @@ class ProcessingState:
         self._process_code(line, "code:backticks:end", language, verbose=verbose)
 
 
-def process_markdown(content: list[str], *, verbose: bool = False) -> list[str]:
+def process_markdown(
+    content: list[str],
+    *,
+    verbose: bool = False,
+    backtick_standardize: bool = True,
+) -> list[str]:
     """Executes code blocks in a list of Markdown-formatted strings and returns the modified list.
 
     Parameters
@@ -301,6 +317,8 @@ def process_markdown(content: list[str], *, verbose: bool = False) -> list[str]:
         A list of Markdown-formatted strings.
     verbose
         If True, print every line that is processed.
+    backtick_standardize
+        If True, clean up markdown-code-runner string from backtick code blocks.
 
     Returns
     -------
@@ -309,14 +327,13 @@ def process_markdown(content: list[str], *, verbose: bool = False) -> list[str]:
 
     """
     assert isinstance(content, list), "Input must be a list"
-    state = ProcessingState()
+    state = ProcessingState(backtick_standardize=backtick_standardize)
 
     for i, line in enumerate(content):
         if verbose:
             nr = _bold(f"line {i:4d}")
             print(f"{nr}: {line}")
         state.process_line(line, verbose=verbose)
-
     return state.new_lines
 
 
@@ -325,15 +342,33 @@ def update_markdown_file(
     output_filepath: Path | str | None = None,
     *,
     verbose: bool = False,
+    backtick_standardize: bool = True,
 ) -> None:
-    """Rewrite a Markdown file by executing and updating code blocks."""
+    """Rewrite a Markdown file by executing and updating code blocks.
+
+    Parameters
+    ----------
+    input_filepath : Path | str
+        Path to the input Markdown file.
+    output_filepath : Path | str | None
+        Path to the output Markdown file. If None, overwrites input file.
+    verbose : bool
+        If True, print every line that is processed.
+    backtick_standardize : bool
+        If True, clean up markdown-code-runner string from backtick code blocks.
+
+    """
     if isinstance(input_filepath, str):  # pragma: no cover
         input_filepath = Path(input_filepath)
     with input_filepath.open() as f:
         original_lines = [line.rstrip("\n") for line in f.readlines()]
     if verbose:
         print(f"Processing input file: {input_filepath}")
-    new_lines = process_markdown(original_lines, verbose=verbose)
+    new_lines = process_markdown(
+        original_lines,
+        verbose=verbose,
+        backtick_standardize=backtick_standardize,
+    )
     updated_content = "\n".join(new_lines).rstrip() + "\n"
     if verbose:
         print(f"Writing output to: {output_filepath}")
@@ -375,12 +410,29 @@ def main() -> None:
         action="version",
         version=f"%(prog)s {__version__}",
     )
+    parser.add_argument(
+        "--no-backtick-standardize",
+        action="store_true",
+        help="Disable backtick standardization (default: enabled for separate output files, disabled for in-place)",
+        default=False,
+    )
 
     args = parser.parse_args()
 
     input_filepath = Path(args.input)
     output_filepath = Path(args.output) if args.output is not None else input_filepath
-    update_markdown_file(input_filepath, output_filepath, verbose=args.verbose)
+
+    # Determine backtick standardization
+    backtick_standardize = (
+        False if args.no_backtick_standardize else args.output is not None
+    )
+
+    update_markdown_file(
+        input_filepath,
+        output_filepath,
+        verbose=args.verbose,
+        backtick_standardize=backtick_standardize,
+    )
 
 
 if __name__ == "__main__":
