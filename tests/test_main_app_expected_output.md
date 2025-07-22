@@ -30,8 +30,8 @@ This is another code block!
 
 ## Code Block 3
 
-Here's a code block using backticks:  
-Where the `markdown-code-runner` is removed if `backtick_standardize` is enabled and a separate output file is specified.  
+Here's a code block using backticks:
+Where the `markdown-code-runner` is removed if `backtick_standardize` is enabled and a separate output file is specified.
 
 ```python markdown-code-runner
 x = 10

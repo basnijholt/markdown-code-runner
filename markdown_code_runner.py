@@ -45,7 +45,6 @@ import contextlib
 import io
 import os
 import re
-import sys
 import subprocess
 from dataclasses import dataclass, field
 from importlib.metadata import PackageNotFoundError, version
@@ -78,12 +77,6 @@ MARKERS = {
     "code:backticks:start": r"```(?P<language>\w+)\smarkdown-code-runner",
     "code:backticks:end": "```",
 }
-
-# List of all start markers for easier checking
-START_MARKERS = [
-    marker for marker in MARKERS 
-    if marker.endswith(":start")
-]
 
 
 def markers_to_patterns() -> dict[str, re.Pattern]:
@@ -170,32 +163,18 @@ def _bold(text: str) -> str:
 
 def _extract_backtick_options(line: str) -> dict[str, str]:
     """Extract extra information from a line."""
-    if "```" not in line:
+    match = re.search(r"```(?P<language>\w+)", line)
+    if not match:
         return {}
-    
-    # First try to match with markdown-code-runner
-    language_pattern = r"```(?P<language>\w+) markdown-code-runner"
-    language_match = re.search(language_pattern, line)
-    
-    # If no match, try to match just the language
-    if language_match is None:
-        language_pattern = r"```(?P<language>\w+)"
-        language_match = re.search(language_pattern, line)
-        if language_match is None:
-            return {}
-    
-    language = language_match.group("language")
-    result = {"language": language}
-    
-    # Only look for extra options if markdown-code-runner is present
+
+    result = {"language": match.group("language")}
+
+    # Extract options after markdown-code-runner
     if "markdown-code-runner" in line:
-        extra_pattern = r"(?P<key>\w+)=(?P<value>\S+)"
-        extra_str = line[language_match.end() :]
-        extra_matches = re.finditer(extra_pattern, extra_str)
-        for match in extra_matches:
-            key, value = match.group("key"), match.group("value")
-            result[key] = value
-    
+        extra_str = line[match.end() :]
+        for option_match in re.finditer(r"(?P<key>\w+)=(?P<value>\S+)", extra_str):
+            result[option_match.group("key")] = option_match.group("value")
+
     return result
 
 
@@ -237,45 +216,33 @@ class ProcessingState:
             self.original_output.append(line)
         else:
             processed_line = self._process_start_markers(line, verbose=verbose)
-            if processed_line: 
+            if processed_line is not None:
                 line = processed_line
 
         if self.section != "output":
             self.new_lines.append(line)
 
-    def _process_start_markers(self, line: str, verbose: bool = False) -> None:
-        for marker in START_MARKERS:
-            if is_marker(line, marker):
+    def _process_start_markers(
+        self,
+        line: str,
+        verbose: bool = False,  # noqa: FBT001, FBT002, ARG002
+    ) -> str | None:
+        for marker_name in MARKERS:
+            if marker_name.endswith(":start") and is_marker(line, marker_name):
                 # reset output in case previous output wasn't displayed
                 self.output = None
                 self.backtick_options = _extract_backtick_options(line)
-                self.section, _ = marker.rsplit(":", 1)  # type: ignore[assignment]
-                processed_line = line
-                if marker == "code:backticks:start":
-                    if verbose:
-                        print(f"Found marker {marker} in line {line}")
-                    processed_line = self._process_backticks_start(line)
-                return processed_line
-            
-    def _process_backticks_start(self, line: str) -> str:
-        """Process backticks start marker and standardize if needed.
-        
-        Args:
-            line: The line containing backticks start marker
-            
-        Returns:
-            Processed line with markdown-code-runner removed if standardization is enabled
-        """
-        language_match = re.search(r"```(?P<language>\w+)", line)
-        if not (language_match and self.backtick_standardize):
-            return line
-            
-        if "markdown-code-runner" not in line:
-            return line
-            
-        # Remove markdown-code-runner and any text after it from the line
-        processed_line = re.sub(r'\smarkdown-code-runner.*(?=```|$)', '', line)
-        return processed_line
+                self.section, _ = marker_name.rsplit(":", 1)  # type: ignore[assignment]
+
+                # Standardize backticks if needed
+                if (
+                    marker_name == "code:backticks:start"
+                    and self.backtick_standardize
+                    and "markdown-code-runner" in line
+                ):
+                    return re.sub(r"\smarkdown-code-runner.*", "", line)
+                return line
+        return None
 
     def _process_output_start(self, line: str) -> None:
         self.section = "output"
@@ -336,7 +303,12 @@ class ProcessingState:
         self._process_code(line, "code:backticks:end", language, verbose=verbose)
 
 
-def process_markdown(content: list[str], *, verbose: bool = False, backtick_standardize: bool = True) -> list[str]:
+def process_markdown(
+    content: list[str],
+    *,
+    verbose: bool = False,
+    backtick_standardize: bool = True,
+) -> list[str]:
     """Executes code blocks in a list of Markdown-formatted strings and returns the modified list.
 
     Parameters
@@ -361,7 +333,7 @@ def process_markdown(content: list[str], *, verbose: bool = False, backtick_stan
         if verbose:
             nr = _bold(f"line {i:4d}")
             print(f"{nr}: {line}")
-        line = state.process_line(line, verbose=verbose)
+        state.process_line(line, verbose=verbose)
     return state.new_lines
 
 
@@ -373,7 +345,7 @@ def update_markdown_file(
     backtick_standardize: bool = True,
 ) -> None:
     """Rewrite a Markdown file by executing and updating code blocks.
-    
+
     Parameters
     ----------
     input_filepath : Path | str
@@ -384,6 +356,7 @@ def update_markdown_file(
         If True, print every line that is processed.
     backtick_standardize : bool
         If True, clean up markdown-code-runner string from backtick code blocks.
+
     """
     if isinstance(input_filepath, str):  # pragma: no cover
         input_filepath = Path(input_filepath)
@@ -391,7 +364,11 @@ def update_markdown_file(
         original_lines = [line.rstrip("\n") for line in f.readlines()]
     if verbose:
         print(f"Processing input file: {input_filepath}")
-    new_lines = process_markdown(original_lines, verbose=verbose, backtick_standardize=backtick_standardize)
+    new_lines = process_markdown(
+        original_lines,
+        verbose=verbose,
+        backtick_standardize=backtick_standardize,
+    )
     updated_content = "\n".join(new_lines).rstrip() + "\n"
     if verbose:
         print(f"Writing output to: {output_filepath}")
@@ -434,15 +411,9 @@ def main() -> None:
         version=f"%(prog)s {__version__}",
     )
     parser.add_argument(
-        "--backtick-standardize",
+        "--no-backtick-standardize",
         action="store_true",
-        help="Clean up markdown-code-runner string from backtick code blocks (default: True when output file is specified)",
-        default=None,
-    )
-    parser.add_argument(
-        "--force-overwrite",
-        action="store_true",
-        help="Required when using backtick-standardize option with input file overwrite",
+        help="Disable backtick standardization (default: enabled for separate output files, disabled for in-place)",
         default=False,
     )
 
@@ -450,17 +421,18 @@ def main() -> None:
 
     input_filepath = Path(args.input)
     output_filepath = Path(args.output) if args.output is not None else input_filepath
-    
+
     # Determine backtick standardization
-    if args.output is None:  # Overwriting input file
-        if args.backtick_standardize and not args.force_overwrite:
-            print("Error: This will overwrite your file. Please use the --force-overwrite option in conjunction to set backtick-standardize option to true", file=sys.stderr)
-            sys.exit(1)
-        backtick_standardize = args.backtick_standardize and args.force_overwrite
-    else:  # Writing to different output file
-        backtick_standardize = args.backtick_standardize if args.backtick_standardize is not None else True
-    
-    update_markdown_file(input_filepath, output_filepath, verbose=args.verbose, backtick_standardize=backtick_standardize)
+    backtick_standardize = (
+        False if args.no_backtick_standardize else args.output is not None
+    )
+
+    update_markdown_file(
+        input_filepath,
+        output_filepath,
+        verbose=args.verbose,
+        backtick_standardize=backtick_standardize,
+    )
 
 
 if __name__ == "__main__":

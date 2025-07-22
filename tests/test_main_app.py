@@ -23,9 +23,18 @@ from markdown_code_runner import (
 TEST_FOLDER = Path(__file__).parent
 
 
-def assert_process(input_lines: list[str], expected_output: list[str], *, backtick_standardize: bool = False) -> None:
+def assert_process(
+    input_lines: list[str],
+    expected_output: list[str],
+    *,
+    backtick_standardize: bool = False,
+) -> None:
     """Assert that the process_markdown function returns the expected output."""
-    output = process_markdown(input_lines, verbose=True, backtick_standardize=backtick_standardize)
+    output = process_markdown(
+        input_lines,
+        verbose=True,
+        backtick_standardize=backtick_standardize,
+    )
     assert output == expected_output, f"Expected\n{expected_output}\ngot\n{output}"
 
 
@@ -196,8 +205,7 @@ def test_main_no_arguments(tmp_path: Path) -> None:
             input=test_filepath,
             output=None,
             verbose=False,
-            backtick_standardize=False,
-            force_overwrite=False,
+            no_backtick_standardize=True,
         ),
     ):
         main()
@@ -218,8 +226,7 @@ def test_main_filepath_argument(tmp_path: Path) -> None:
             input=test_filepath,
             output=str(output_filepath),
             verbose=False,
-            backtick_standardize=False,
-            force_overwrite=False,
+            no_backtick_standardize=True,
         ),
     ):
         main()
@@ -240,8 +247,7 @@ def test_main_debug_mode(capfd: pytest.CaptureFixture, tmp_path: Path) -> None:
             input=test_filepath,
             output=str(output_filepath),
             verbose=True,
-            backtick_standardize=False,
-            force_overwrite=False,
+            no_backtick_standardize=True,
         ),
     ):
         main()

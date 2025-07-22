@@ -3,7 +3,7 @@
 This file tests various backtick code block scenarios.
 
 ## Basic Code Block
-A simple Python code block with markdown-code-runner:  
+A simple Python code block with markdown-code-runner:
 Currently no options are supported for backtick code blocks. May be used in the future.
 
 ```python markdown-code-runner filename=test1.py
@@ -29,7 +29,7 @@ fn main() {
 ## Complex Options Block
 Testing complex options and spacing:
 
-```python   markdown-code-runner    filename=test3.py   debug=true   skip=false   
+```python   markdown-code-runner    filename=test3.py   debug=true   skip=false
 print("Testing spaces in options")
 ```
 
