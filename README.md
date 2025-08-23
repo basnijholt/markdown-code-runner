@@ -269,7 +269,7 @@ jobs:
           python-version: "3.13.2"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
 
       - name: Install markdown-code-runner
         run: |
