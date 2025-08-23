@@ -787,3 +787,91 @@ def test_patterns() -> None:
 def test_extract_extra(line: str, expected_result: str) -> None:
     """Test that the _extract_backtick_options function works as expected."""
     assert _extract_backtick_options(line) == expected_result
+
+
+def _verify_no_trailing_whitespace(output_section: list[str], label: str = "") -> None:
+    """Helper to verify no trailing whitespace in output."""
+    for line in output_section:
+        assert line == line.rstrip(), f"{label}Line has trailing whitespace: '{line}'"
+
+
+def test_trailing_whitespace_trimming() -> None:
+    """Test that trailing whitespace is properly trimmed from output."""
+    # Test case 1: Python code with trailing whitespace
+    input_lines = [
+        "# Test trailing whitespace",
+        "```python markdown-code-runner",
+        "print('Hello World  ')",
+        "print('Line with spaces    ')",
+        "print('')",
+        "print('After empty line')",
+        "print('    ')  # This will print only spaces",
+        "```",
+        "<!-- OUTPUT:START -->",
+        "<!-- OUTPUT:END -->",
+    ]
+
+    output = process_markdown(input_lines, backtick_standardize=False)
+    start_idx = output.index("<!-- OUTPUT:START -->")
+    end_idx = output.index("<!-- OUTPUT:END -->")
+    output_section = output[start_idx + 2 : end_idx]
+
+    _verify_no_trailing_whitespace(output_section, "Python ")
+    assert output_section[0] == "Hello World"
+    assert output_section[1] == "Line with spaces"
+    assert output_section[2] == ""
+    assert output_section[3] == "After empty line"
+    assert output_section[4] == ""  # Line with only spaces becomes empty
+    assert output_section[5] == ""  # Trailing empty line preserved
+
+    # Test case 2: Bash code with trailing whitespace
+    input_lines_bash = [
+        "```bash markdown-code-runner",
+        "echo 'Hello from bash   '",
+        "echo 'Another line     '",
+        "echo ''",
+        "echo 'After empty'",
+        "echo '   '  # Only spaces",
+        "```",
+        "<!-- OUTPUT:START -->",
+        "<!-- OUTPUT:END -->",
+    ]
+
+    output_bash = process_markdown(input_lines_bash, backtick_standardize=False)
+    start_idx_bash = output_bash.index("<!-- OUTPUT:START -->")
+    end_idx_bash = output_bash.index("<!-- OUTPUT:END -->")
+    output_section_bash = output_bash[start_idx_bash + 2 : end_idx_bash]
+
+    _verify_no_trailing_whitespace(output_section_bash, "Bash ")
+    assert output_section_bash[0] == "Hello from bash"
+    assert output_section_bash[1] == "Another line"
+    assert output_section_bash[2] == ""
+    assert output_section_bash[3] == "After empty"
+    assert output_section_bash[4] == ""  # Line with only spaces becomes empty
+    assert output_section_bash[5] == ""  # Trailing empty line preserved
+
+    # Test case 3: Hidden code block with trailing whitespace
+    input_lines_hidden = [
+        "<!-- CODE:START -->",
+        "<!-- print('Hidden output   ') -->",
+        "<!-- print('With spaces     ') -->",
+        "<!-- print('') -->",
+        "<!-- print('Final line') -->",
+        "<!-- print('      ')  # Only spaces -->",
+        "<!-- CODE:END -->",
+        "<!-- OUTPUT:START -->",
+        "<!-- OUTPUT:END -->",
+    ]
+
+    output_hidden = process_markdown(input_lines_hidden, backtick_standardize=False)
+    start_idx_hidden = output_hidden.index("<!-- OUTPUT:START -->")
+    end_idx_hidden = output_hidden.index("<!-- OUTPUT:END -->")
+    output_section_hidden = output_hidden[start_idx_hidden + 2 : end_idx_hidden]
+
+    _verify_no_trailing_whitespace(output_section_hidden, "Hidden ")
+    assert output_section_hidden[0] == "Hidden output"
+    assert output_section_hidden[1] == "With spaces"
+    assert output_section_hidden[2] == ""
+    assert output_section_hidden[3] == "Final line"
+    assert output_section_hidden[4] == ""  # Line with only spaces becomes empty
+    assert output_section_hidden[5] == ""  # Trailing empty line preserved
