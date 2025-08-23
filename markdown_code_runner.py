@@ -251,7 +251,9 @@ class ProcessingState:
                 self.output,
                 list,
             ), f"Output must be a list, not {type(self.output)}, line: {line}"
-            self.new_lines.extend([line, MARKERS["warning"], *self.output])
+            # Trim trailing whitespace from output lines
+            trimmed_output = [line.rstrip() for line in self.output]
+            self.new_lines.extend([line, MARKERS["warning"], *trimmed_output])
         else:
             self.original_output.append(line)
 
