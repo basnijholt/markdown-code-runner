@@ -284,6 +284,11 @@ class ProcessingState:
                     return line
         return None
 
+    @staticmethod
+    def _get_indent(line: str) -> str:
+        """Extract leading whitespace from a line."""
+        return line[: len(line) - len(line.lstrip())]
+
     def _process_output_start(self, line: str) -> None:
         self.section = "output"
         if not self.skip_code_block:
@@ -291,16 +296,11 @@ class ProcessingState:
                 self.output,
                 list,
             ), f"Output must be a list, not {type(self.output)}, line: {line}"
-            # Extract indent from OUTPUT:START line
-            output_indent = line[: len(line) - len(line.lstrip())]
-
-            def _add_indent(s: str) -> str:
-                stripped = s.rstrip()
-                return output_indent + stripped if stripped else ""
-
-            trimmed_output = [_add_indent(ol) for ol in self.output]
-            indented_warning = output_indent + MARKERS["warning"]
-            self.new_lines.extend([line, indented_warning, *trimmed_output])
+            indent = self._get_indent(line)
+            trimmed_output = [
+                indent + ol.rstrip() if ol.strip() else "" for ol in self.output
+            ]
+            self.new_lines.extend([line, indent + MARKERS["warning"], *trimmed_output])
         else:
             self.original_output.append(line)
 
