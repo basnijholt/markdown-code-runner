@@ -61,6 +61,44 @@ By default, when writing to a separate output file, the `markdown-code-runner` t
 markdown-code-runner README.md -o output.md --no-backtick-standardize
 ```
 
+### Standardize All Code Fences (`-s`, `--standardize`)
+
+Post-process the output to standardize ALL code fences, removing `markdown-code-runner` modifiers from language identifiers. This is useful for compatibility with markdown processors like mkdocs and pandoc that don't understand the `python markdown-code-runner` syntax.
+
+```bash
+markdown-code-runner README.md --standardize
+```
+
+This transforms code fences like:
+
+````markdown
+```python markdown-code-runner
+print('hello')
+```
+````
+
+Into standard code fences:
+
+````markdown
+```python
+print('hello')
+```
+````
+
+### Skip Code Execution (`-n`, `--no-execute`)
+
+Skip code execution entirely. This is useful when you only want to standardize code fences without running any code.
+
+```bash
+markdown-code-runner README.md --no-execute --standardize
+```
+
+This combination is particularly useful for:
+
+- Preparing files for external markdown processors
+- Converting files without re-running code blocks
+- Creating compatible output from existing processed files
+
 ### Version (`-v`, `--version`)
 
 Display the installed version.
