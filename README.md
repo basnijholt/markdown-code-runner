@@ -8,8 +8,6 @@ This package is particularly useful for maintaining Markdown files with embedded
 It also enables the generation of content such as tables, plots, and other visualizations directly from the code.
 <!-- SECTION:intro:END -->
 
-The package is hosted on GitHub: [https://github.com/basnijholt/markdown-code-runner](https://github.com/basnijholt/markdown-code-runner)
-
 **Documentation**: [https://markdown-code-runner.nijho.lt](https://markdown-code-runner.nijho.lt)
 
 <!-- SECTION:features:START -->
