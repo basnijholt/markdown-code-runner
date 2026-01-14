@@ -21,3 +21,11 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: ["types-PyYAML", "types-requests", "types-setuptools"]
+  - repo: local
+    hooks:
+      - id: docs-placeholders
+        name: Verify docs templates have placeholders
+        entry: python docs/docs_gen.py --verify
+        language: python
+        pass_filenames: false
+        files: ^docs/.*\.md$

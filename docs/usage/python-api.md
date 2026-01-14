@@ -1,0 +1,119 @@
+---
+icon: lucide/code
+---
+
+# Python API
+
+<!-- CODE:START -->
+<!-- from docs_gen import readme_section -->
+<!-- print(readme_section("python-api")) -->
+<!-- CODE:END -->
+<!-- OUTPUT:START -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
+<!-- OUTPUT:END -->
+
+## Function Reference
+
+### `update_markdown_file`
+
+The main function for processing Markdown files.
+
+```python
+def update_markdown_file(
+    input_filepath: Path | str,
+    output_filepath: Path | str | None = None,
+    *,
+    verbose: bool = False,
+    backtick_standardize: bool = True,
+) -> None:
+    """Rewrite a Markdown file by executing and updating code blocks.
+
+    Parameters
+    ----------
+    input_filepath : Path | str
+        Path to the input Markdown file.
+    output_filepath : Path | str | None
+        Path to the output Markdown file. If None, overwrites input file.
+    verbose : bool
+        If True, print every line that is processed.
+    backtick_standardize : bool
+        If True, clean up markdown-code-runner string from backtick code blocks.
+    """
+```
+
+### `process_markdown`
+
+Lower-level function for processing Markdown content as a list of strings.
+
+```python
+def process_markdown(
+    content: list[str],
+    *,
+    verbose: bool = False,
+    backtick_standardize: bool = True,
+) -> list[str]:
+    """Execute code blocks in a list of Markdown-formatted strings.
+
+    Parameters
+    ----------
+    content
+        A list of Markdown-formatted strings.
+    verbose
+        If True, print every line that is processed.
+    backtick_standardize
+        If True, clean up markdown-code-runner string from backtick code blocks.
+
+    Returns
+    -------
+    list[str]
+        A modified list of Markdown-formatted strings with code block output inserted.
+    """
+```
+
+## Examples
+
+### Basic Usage
+
+```python
+from markdown_code_runner import update_markdown_file
+
+# Update a Markdown file in-place
+update_markdown_file("README.md")
+
+# Write to a different file
+update_markdown_file("README.md", "README_updated.md")
+
+# Enable verbose output
+update_markdown_file("README.md", verbose=True)
+```
+
+### Processing Content Directly
+
+```python
+from markdown_code_runner import process_markdown
+
+content = [
+    "<!-- CODE:START -->",
+    "<!-- print('Hello, world!') -->",
+    "<!-- CODE:END -->",
+    "<!-- OUTPUT:START -->",
+    "This will be replaced.",
+    "<!-- OUTPUT:END -->",
+]
+
+result = process_markdown(content)
+print("\n".join(result))
+```
+
+### Batch Processing Multiple Files
+
+```python
+from pathlib import Path
+from markdown_code_runner import update_markdown_file
+
+docs_dir = Path("docs")
+for md_file in docs_dir.rglob("*.md"):
+    if "<!-- CODE:START -->" in md_file.read_text():
+        print(f"Processing {md_file}...")
+        update_markdown_file(md_file)
+```
