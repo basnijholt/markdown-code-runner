@@ -2,7 +2,7 @@ name: Documentation
 
 on:
   push:
-    branches: [main, docs-site]  # TODO: Remove docs-site before merging
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -50,8 +50,7 @@ jobs:
           path: ./site
 
   deploy:
-    # TODO: Remove docs-site condition before merging
-    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docs-site') && github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
