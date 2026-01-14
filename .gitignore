@@ -37,3 +37,6 @@ ENV/
 .env
 .coverage
 htmlcov/
+
+# Documentation build output
+site/

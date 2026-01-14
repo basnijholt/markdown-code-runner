@@ -19,6 +19,7 @@ Homepage = "https://github.com/basnijholt/markdown-code-runner"
 
 [project.optional-dependencies]
 test = ["pytest", "pre-commit", "coverage", "pytest-cov"]
+docs = ["zensical", "markdown-gfm-admonition", "pandas", "tabulate", "requests"]
 
 [project.scripts]
 markdown-code-runner = "markdown_code_runner:main"
