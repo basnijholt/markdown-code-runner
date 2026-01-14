@@ -6,6 +6,7 @@ from markdown_code_runner import (
     ProcessingState,
     _extract_backtick_options,
     process_markdown,
+    standardize_code_fences,
     update_markdown_file,
 )
 
@@ -161,3 +162,192 @@ def test_process_backticks_start() -> None:
     line = "```javascript some other content"
     result = state._process_start_markers(line)
     assert result is None
+
+
+def test_standardize_code_fences() -> None:
+    """Test the standardize_code_fences utility function."""
+    # Basic case
+    content = """# Example
+```python markdown-code-runner
+print('hello')
+```
+Some text
+```javascript
+console.log('hi')
+```"""
+    expected = """# Example
+```python
+print('hello')
+```
+Some text
+```javascript
+console.log('hi')
+```"""
+    assert standardize_code_fences(content) == expected
+
+    # With options
+    content = """```python markdown-code-runner filename=test.py debug=true
+code here
+```"""
+    expected = """```python
+code here
+```"""
+    assert standardize_code_fences(content) == expected
+
+    # Multiple occurrences
+    content = """```python markdown-code-runner
+first
+```
+text
+```bash markdown-code-runner
+second
+```
+more text
+```rust markdown-code-runner filename=test.rs
+third
+```"""
+    expected = """```python
+first
+```
+text
+```bash
+second
+```
+more text
+```rust
+third
+```"""
+    assert standardize_code_fences(content) == expected
+
+    # Text references should be preserved
+    content = """Using `markdown-code-runner` is easy.
+```python markdown-code-runner
+code
+```"""
+    expected = """Using `markdown-code-runner` is easy.
+```python
+code
+```"""
+    assert standardize_code_fences(content) == expected
+
+
+def test_process_markdown_execute_flag() -> None:
+    """Test process_markdown with execute=False."""
+    input_lines = [
+        "# Test",
+        "```python markdown-code-runner",
+        "print('hello')",
+        "```",
+        "<!-- OUTPUT:START -->",
+        "old output",
+        "<!-- OUTPUT:END -->",
+    ]
+
+    # With execute=False, content should pass through unchanged
+    output = process_markdown(input_lines, execute=False)
+    assert output == input_lines
+
+    # With execute=True (default), code should be executed
+    output = process_markdown(input_lines, execute=True, backtick_standardize=False)
+    assert "hello" in "\n".join(output)
+    assert "old output" not in "\n".join(output)
+
+
+def test_update_markdown_file_execute_flag(tmp_path: Path) -> None:
+    """Test update_markdown_file with execute=False."""
+    input_file = tmp_path / "test.md"
+
+    content = """# Test
+```python markdown-code-runner
+print('hello')
+```
+<!-- OUTPUT:START -->
+old output
+<!-- OUTPUT:END -->"""
+
+    input_file.write_text(content)
+
+    # Test with execute=False - content should be unchanged
+    update_markdown_file(input_file, execute=False)
+    result = input_file.read_text()
+    assert "old output" in result  # Output not updated
+
+    # Restore content
+    input_file.write_text(content)
+
+    # Test with execute=True (default) - code should run
+    update_markdown_file(input_file, execute=True, backtick_standardize=False)
+    result = input_file.read_text()
+    assert "hello" in result
+    assert "old output" not in result
+
+
+def test_update_markdown_file_standardize_flag(tmp_path: Path) -> None:
+    """Test update_markdown_file with standardize=True."""
+    input_file = tmp_path / "test.md"
+    output_file = tmp_path / "output.md"
+
+    # Content with code fence and text reference to markdown-code-runner
+    content = """# Test
+Using `markdown-code-runner` is great!
+```python markdown-code-runner
+print('hello')
+```
+<!-- OUTPUT:START -->
+old output
+<!-- OUTPUT:END -->
+```bash markdown-code-runner
+echo "test"
+```
+<!-- OUTPUT:START -->
+old bash output
+<!-- OUTPUT:END -->"""
+
+    input_file.write_text(content)
+
+    # Test with standardize=True - all code fences should be cleaned
+    update_markdown_file(input_file, output_file, standardize=True)
+    result = output_file.read_text()
+
+    # Code fences should be standardized
+    assert "```python\n" in result
+    assert "```bash\n" in result
+    assert "```python markdown-code-runner" not in result
+    assert "```bash markdown-code-runner" not in result
+
+    # Text references should be preserved
+    assert "`markdown-code-runner`" in result
+
+    # Code should have executed
+    assert "hello" in result
+    assert "test" in result
+    assert "old output" not in result
+
+
+def test_update_markdown_file_standardize_without_execute(tmp_path: Path) -> None:
+    """Test update_markdown_file with standardize=True and execute=False."""
+    input_file = tmp_path / "test.md"
+    output_file = tmp_path / "output.md"
+
+    content = """# Test
+```python markdown-code-runner
+print('hello')
+```
+<!-- OUTPUT:START -->
+old output
+<!-- OUTPUT:END -->"""
+
+    input_file.write_text(content)
+
+    # Test with standardize=True and execute=False
+    update_markdown_file(input_file, output_file, execute=False, standardize=True)
+    result = output_file.read_text()
+
+    # Code fences should be standardized
+    assert "```python\n" in result
+    assert "```python markdown-code-runner" not in result
+
+    # Code should NOT have executed (execute=False)
+    # The auto-generated warning should not appear
+    assert "old output" in result
+    assert "auto-generated" not in result

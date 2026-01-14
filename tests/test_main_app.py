@@ -206,6 +206,8 @@ def test_main_no_arguments(tmp_path: Path) -> None:
             output=None,
             verbose=False,
             no_backtick_standardize=True,
+            standardize=False,
+            no_execute=False,
         ),
     ):
         main()
@@ -227,6 +229,8 @@ def test_main_filepath_argument(tmp_path: Path) -> None:
             output=str(output_filepath),
             verbose=False,
             no_backtick_standardize=True,
+            standardize=False,
+            no_execute=False,
         ),
     ):
         main()
@@ -248,6 +252,8 @@ def test_main_debug_mode(capfd: pytest.CaptureFixture, tmp_path: Path) -> None:
             output=str(output_filepath),
             verbose=True,
             no_backtick_standardize=True,
+            standardize=False,
+            no_execute=False,
         ),
     ):
         main()

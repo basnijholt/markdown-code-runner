@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# ruff: noqa: T201, S603, S607
+# ruff: noqa: S603, S607
 """Documentation generation utilities for Markdown Code Runner.
 
 Provides functions to extract sections from README.md and transform
@@ -98,17 +98,7 @@ def _transform_readme_links(content: str) -> str:
         content = content.replace(f"]({old_link})", f"]({new_link})")
 
     # Remove ToC link pattern [[ToC](#...)]
-    content = re.sub(r"\[\[ToC\]\([^)]+\)\]", "", content)
-
-    # Strip 'markdown-code-runner' modifier from code fence language identifiers
-    # e.g., "```python markdown-code-runner" -> "```python"
-    # This is needed because the docs site renderer doesn't understand this syntax
-    return re.sub(
-        r"^(```\w+)\s+markdown-code-runner(?:\s+\S+=\S+)?$",
-        r"\1",
-        content,
-        flags=re.MULTILINE,
-    )
+    return re.sub(r"\[\[ToC\]\([^)]+\)\]", "", content)
 
 
 def _find_markdown_files_with_code_blocks(docs_dir: Path) -> list[Path]:
@@ -143,7 +133,7 @@ def _run_markdown_code_runner(files: list[Path], repo_root: Path) -> bool:
         rel_path = file.relative_to(repo_root)
         print(f"Updating {rel_path}...", end=" ", flush=True)
         result = subprocess.run(
-            ["markdown-code-runner", str(file)],
+            ["markdown-code-runner", "--standardize", str(file)],
             check=False,
             capture_output=True,
             text=True,
