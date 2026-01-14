@@ -881,3 +881,79 @@ def test_trailing_whitespace_trimming() -> None:
     assert output_section_hidden[3] == "Final line"
     assert output_section_hidden[4] == ""  # Line with only spaces becomes empty
     assert output_section_hidden[5] == ""  # Trailing empty line preserved
+
+
+def test_indented_code_blocks() -> None:
+    """Test that indented code blocks (e.g., in list items) work correctly."""
+    # Test case 1: Indented backtick code block (4 spaces, like in a list)
+    input_lines = [
+        "1. List item:",
+        "",
+        "    ```python markdown-code-runner",
+        "    print('hello')",
+        "    ```",
+        "    <!-- OUTPUT:START -->",
+        "    old output",
+        "    <!-- OUTPUT:END -->",
+    ]
+    expected_output = [
+        "1. List item:",
+        "",
+        "    ```python markdown-code-runner",
+        "    print('hello')",
+        "    ```",
+        "    <!-- OUTPUT:START -->",
+        "    " + MARKERS["warning"],
+        "    hello",
+        "",
+        "    <!-- OUTPUT:END -->",
+    ]
+    assert_process(input_lines, expected_output, backtick_standardize=False)
+
+    # Test case 2: Indented code with internal indentation (Python function)
+    input_lines = [
+        "1. Example:",
+        "",
+        "    ```python markdown-code-runner",
+        "    def foo():",
+        "        return 42",
+        "    print(foo())",
+        "    ```",
+        "    <!-- OUTPUT:START -->",
+        "    <!-- OUTPUT:END -->",
+    ]
+    expected_output = [
+        "1. Example:",
+        "",
+        "    ```python markdown-code-runner",
+        "    def foo():",
+        "        return 42",
+        "    print(foo())",
+        "    ```",
+        "    <!-- OUTPUT:START -->",
+        "    " + MARKERS["warning"],
+        "    42",
+        "",
+        "    <!-- OUTPUT:END -->",
+    ]
+    assert_process(input_lines, expected_output, backtick_standardize=False)
+
+    # Test case 3: Indented bash code block
+    input_lines = [
+        "    ```bash markdown-code-runner",
+        '    echo "indented bash"',
+        "    ```",
+        "    <!-- OUTPUT:START -->",
+        "    <!-- OUTPUT:END -->",
+    ]
+    expected_output = [
+        "    ```bash markdown-code-runner",
+        '    echo "indented bash"',
+        "    ```",
+        "    <!-- OUTPUT:START -->",
+        "    " + MARKERS["warning"],
+        "    indented bash",
+        "",
+        "    <!-- OUTPUT:END -->",
+    ]
+    assert_process(input_lines, expected_output, backtick_standardize=False)
