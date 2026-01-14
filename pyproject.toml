@@ -57,30 +57,30 @@ exclude_lines = [
     "if __name__ == .__main__.:",
 ]
 
-[tool.black]
-line_length = 88
-
 [tool.ruff]
-line-length = 150
+line-length = 120
 target-version = "py39"
+
+[tool.ruff.lint]
 select = ["ALL"]
 ignore = [
     "T20",     # flake8-print
-    "ANN101",  # Missing type annotation for {name} in method
     "S101",    # Use of assert detected
-    "PD901",   # df is a bad variable name. Be kinder to your future self.
     "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed in {name}
     "D402",    # First line should not be the function's signature
     "PLW0603", # Using the global statement to update `X` is discouraged
     "D401",    # First line of docstring should be in imperative mood
+    "COM812",  # Conflicts with ruff formatter
+    "D203",    # Conflicts with D211
+    "D213",    # Conflicts with D212
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/*" = ["SLF001"]
 "ci/*" = ["INP001"]
 "tests/test_examples.py" = ["E501"]
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 18
 
 [tool.mypy]

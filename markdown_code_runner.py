@@ -295,9 +295,7 @@ class ProcessingState:
                 list,
             ), f"Output must be a list, not {type(self.output)}, line: {line}"
             indent = self._get_indent(line)
-            trimmed_output = [
-                indent + ol.rstrip() if ol.strip() else "" for ol in self.output
-            ]
+            trimmed_output = [indent + ol.rstrip() if ol.strip() else "" for ol in self.output]
             self.new_lines.extend([line, indent + MARKERS["warning"], *trimmed_output])
         else:
             self.original_output.append(line)
@@ -340,9 +338,7 @@ class ProcessingState:
             self.indent = ""
         else:
             # remove_md_comment already strips whitespace; for backticks, strip indent
-            code_line = (
-                remove_md_comment(line) if remove_comment else self._strip_indent(line)
-            )
+            code_line = remove_md_comment(line) if remove_comment else self._strip_indent(line)
             self.code.append(code_line)
 
     def _process_comment_code(self, line: str, *, verbose: bool) -> None:
@@ -454,9 +450,7 @@ def update_markdown_file(  # noqa: PLR0913
 
     if verbose:
         print(f"Writing output to: {output_filepath}")
-    output_filepath = (
-        input_filepath if output_filepath is None else Path(output_filepath)
-    )
+    output_filepath = input_filepath if output_filepath is None else Path(output_filepath)
     with output_filepath.open("w") as f:
         f.write(updated_content)
     if verbose:
@@ -519,9 +513,7 @@ def main() -> None:
     output_filepath = Path(args.output) if args.output is not None else input_filepath
 
     # Determine backtick standardization
-    backtick_standardize = (
-        False if args.no_backtick_standardize else args.output is not None
-    )
+    backtick_standardize = False if args.no_backtick_standardize else args.output is not None
 
     update_markdown_file(
         input_filepath,
