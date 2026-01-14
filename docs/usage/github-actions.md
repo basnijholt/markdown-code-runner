@@ -37,13 +37,19 @@ The workflow triggers on:
 
 ### Processing Multiple Files
 
-To process multiple Markdown files, create a helper script:
+To process multiple Markdown files, create a helper script using [PEP 723](https://peps.python.org/pep-0723/) inline script dependencies:
 
 ```python
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["markdown-code-runner"]
+# ///
 """Update all markdown files that use markdown-code-runner."""
 from pathlib import Path
-import subprocess
+
+from markdown_code_runner import update_markdown_file
+
 
 def find_markdown_files(root: Path) -> list[Path]:
     """Find all markdown files containing code markers."""
@@ -53,6 +59,7 @@ def find_markdown_files(root: Path) -> list[Path]:
         if "<!-- CODE:START -->" in content:
             files.append(md_file)
     return sorted(files)
+
 
 def main():
     root = Path(".")
@@ -65,25 +72,14 @@ def main():
 
     for f in files:
         print(f"Processing {f}...")
-        subprocess.run(["markdown-code-runner", str(f)], check=True)
+        update_markdown_file(f)
+
 
 if __name__ == "__main__":
     main()
 ```
 
-### Caching Dependencies
-
-Add caching to speed up your workflow:
-
-```yaml
-- name: Cache pip packages
-  uses: actions/cache@v4
-  with:
-    path: ~/.cache/pip
-    key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-    restore-keys: |
-      ${{ runner.os }}-pip-
-```
+Run it with `uv run update_docs.py` or make it executable and run directly.
 
 ### Only Run on Specific Files
 
