@@ -98,7 +98,17 @@ def _transform_readme_links(content: str) -> str:
         content = content.replace(f"]({old_link})", f"]({new_link})")
 
     # Remove ToC link pattern [[ToC](#...)]
-    return re.sub(r"\[\[ToC\]\([^)]+\)\]", "", content)
+    content = re.sub(r"\[\[ToC\]\([^)]+\)\]", "", content)
+
+    # Strip 'markdown-code-runner' modifier from code fence language identifiers
+    # e.g., "```python markdown-code-runner" -> "```python"
+    # This is needed because the docs site renderer doesn't understand this syntax
+    return re.sub(
+        r"^(```\w+)\s+markdown-code-runner(?:\s+\S+=\S+)?$",
+        r"\1",
+        content,
+        flags=re.MULTILINE,
+    )
 
 
 def _find_markdown_files_with_code_blocks(docs_dir: Path) -> list[Path]:
