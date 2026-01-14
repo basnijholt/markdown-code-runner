@@ -265,23 +265,21 @@ class ProcessingState:
         verbose: bool = False,  # noqa: FBT001, FBT002, ARG002
     ) -> str | None:
         for marker_name in MARKERS:
-            if marker_name.endswith(":start"):
-                match = is_marker(line, marker_name)
-                if match:
-                    # reset output in case previous output wasn't displayed
-                    self.output = None
-                    self.backtick_options = _extract_backtick_options(line)
-                    self.section, _ = marker_name.rsplit(":", 1)  # type: ignore[assignment]
-                    self.indent = match.group("spaces")
+            if marker_name.endswith(":start") and is_marker(line, marker_name):
+                # reset output in case previous output wasn't displayed
+                self.output = None
+                self.backtick_options = _extract_backtick_options(line)
+                self.section, _ = marker_name.rsplit(":", 1)  # type: ignore[assignment]
+                self.indent = self._get_indent(line)
 
-                    # Standardize backticks if needed
-                    if (
-                        marker_name == "code:backticks:start"
-                        and self.backtick_standardize
-                        and "markdown-code-runner" in line
-                    ):
-                        return re.sub(r"\smarkdown-code-runner.*", "", line)
-                    return line
+                # Standardize backticks if needed
+                if (
+                    marker_name == "code:backticks:start"
+                    and self.backtick_standardize
+                    and "markdown-code-runner" in line
+                ):
+                    return re.sub(r"\smarkdown-code-runner.*", "", line)
+                return line
         return None
 
     @staticmethod
