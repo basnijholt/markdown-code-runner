@@ -1,8 +1,6 @@
-# Markdown Code Runner
+<img src="https://raw.githubusercontent.com/basnijholt/markdown-code-runner/main/docs/assets/logo.svg" alt="Markdown Code Runner Logo" align="right" style="width: 200px;" />
 
-<p align="center">
-  <img src="docs/assets/logo.svg" alt="Markdown Code Runner Logo" width="200" />
-</p>
+# Markdown Code Runner
 
 <!-- SECTION:intro:START -->
 `markdown-code-runner` is a Python package that automatically executes code blocks within a Markdown file, including hidden code blocks, and updates the output in-place.
