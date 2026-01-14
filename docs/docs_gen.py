@@ -98,6 +98,8 @@ def _escape_markers_outside_fences(content: str) -> str:
     This ensures:
     - Examples inside ```markdown``` fences stay clean and copyable
     - Working demos outside fences get escaped to prevent re-execution
+
+    Handles nested fences correctly (e.g., ```` containing ```).
     """
     # Markers to escape with zero-width space after "<!"
     marker_patterns = [
@@ -112,20 +114,36 @@ def _escape_markers_outside_fences(content: str) -> str:
     # Pattern to match executable code blocks
     executable_block_pattern = re.compile(r"```(\w+)\s+markdown-code-runner")
 
+    # Pattern to detect fence opening/closing (captures the fence characters)
+    fence_pattern = re.compile(r"^(\s*)(`{3,}|~{3,})")
+
     lines = content.split("\n")
     result = []
-    in_fence = False
+    fence_delimiter: str | None = None  # Track the opening fence delimiter
 
     for line in lines:
-        # Check for fence boundaries (``` or ~~~, with optional language)
-        stripped = line.lstrip()
-        if stripped.startswith(("```", "~~~")):
-            in_fence = not in_fence
+        match = fence_pattern.match(line)
+        if match:
+            fence_chars = match.group(2)
+            if fence_delimiter is None:
+                # Opening a new fence - remember the delimiter
+                fence_delimiter = fence_chars[0] * len(fence_chars)
+                result.append(line)
+                continue
+            # Check if this closes the current fence (same char, at least same length)
+            if fence_chars[0] == fence_delimiter[0] and len(fence_chars) >= len(
+                fence_delimiter,
+            ):
+                # Closing the fence
+                fence_delimiter = None
+                result.append(line)
+                continue
+            # Otherwise it's a nested fence marker, treat as content
             result.append(line)
             continue
 
-        if not in_fence:
-            # Escape comment markers outside fences
+        if fence_delimiter is None:
+            # Outside any fence - escape markers
             escaped_line = line
             for old, new in marker_patterns:
                 escaped_line = escaped_line.replace(old, new)
@@ -136,6 +154,7 @@ def _escape_markers_outside_fences(content: str) -> str:
             )
             result.append(escaped_line)
         else:
+            # Inside a fence - keep content unchanged
             result.append(line)
 
     return "\n".join(result)
