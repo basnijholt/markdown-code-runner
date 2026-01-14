@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# ruff: noqa: T201, S603, S607
+# ruff: noqa: S603, S607
 """Documentation generation utilities for Markdown Code Runner.
 
 Provides functions to extract sections from README.md and transform
@@ -133,7 +133,7 @@ def _run_markdown_code_runner(files: list[Path], repo_root: Path) -> bool:
         rel_path = file.relative_to(repo_root)
         print(f"Updating {rel_path}...", end=" ", flush=True)
         result = subprocess.run(
-            ["markdown-code-runner", str(file)],
+            ["markdown-code-runner", "--standardize", str(file)],
             check=False,
             capture_output=True,
             text=True,

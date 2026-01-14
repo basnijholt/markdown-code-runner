@@ -161,6 +161,42 @@ def _bold(text: str) -> str:
     return f"{bold}{text}{reset}"
 
 
+def standardize_code_fences(content: str) -> str:
+    """Strip markdown-code-runner modifiers from all code fence language identifiers.
+
+    This is useful for making markdown files compatible with standard markdown
+    processors like mkdocs and pandoc, which don't understand the
+    ``python markdown-code-runner`` syntax.
+
+    Parameters
+    ----------
+    content
+        The markdown content as a string.
+
+    Returns
+    -------
+    str
+        The content with all code fence modifiers stripped.
+
+    Examples
+    --------
+    >>> text = '''```python markdown-code-runner
+    ... print("hello")
+    ... ```'''
+    >>> print(standardize_code_fences(text))
+    ```python
+    print("hello")
+    ```
+
+    """
+    return re.sub(
+        r"^(```\w+)\s+markdown-code-runner(?:\s+\S+=\S+)*\s*$",
+        r"\1",
+        content,
+        flags=re.MULTILINE,
+    )
+
+
 def _extract_backtick_options(line: str) -> dict[str, str]:
     """Extract extra information from a line."""
     match = re.search(r"```(?P<language>\w+)", line)
@@ -310,6 +346,7 @@ def process_markdown(
     *,
     verbose: bool = False,
     backtick_standardize: bool = True,
+    execute: bool = True,
 ) -> list[str]:
     """Executes code blocks in a list of Markdown-formatted strings and returns the modified list.
 
@@ -321,6 +358,9 @@ def process_markdown(
         If True, print every line that is processed.
     backtick_standardize
         If True, clean up markdown-code-runner string from backtick code blocks.
+    execute
+        If True, execute code blocks and update output sections.
+        If False, return content unchanged (useful with post-processing standardization).
 
     Returns
     -------
@@ -329,6 +369,9 @@ def process_markdown(
 
     """
     assert isinstance(content, list), "Input must be a list"
+    if not execute:
+        return content
+
     state = ProcessingState(backtick_standardize=backtick_standardize)
 
     for i, line in enumerate(content):
@@ -339,12 +382,14 @@ def process_markdown(
     return state.new_lines
 
 
-def update_markdown_file(
+def update_markdown_file(  # noqa: PLR0913
     input_filepath: Path | str,
     output_filepath: Path | str | None = None,
     *,
     verbose: bool = False,
     backtick_standardize: bool = True,
+    execute: bool = True,
+    standardize: bool = False,
 ) -> None:
     """Rewrite a Markdown file by executing and updating code blocks.
 
@@ -357,7 +402,14 @@ def update_markdown_file(
     verbose : bool
         If True, print every line that is processed.
     backtick_standardize : bool
-        If True, clean up markdown-code-runner string from backtick code blocks.
+        If True, clean up markdown-code-runner string from executed backtick code blocks.
+    execute : bool
+        If True, execute code blocks and update output sections.
+        If False, skip code execution (useful with standardize=True).
+    standardize : bool
+        If True, post-process to standardize ALL code fences in the output,
+        removing ``markdown-code-runner`` modifiers. This is useful for
+        compatibility with markdown processors like mkdocs and pandoc.
 
     """
     if isinstance(input_filepath, str):  # pragma: no cover
@@ -370,8 +422,16 @@ def update_markdown_file(
         original_lines,
         verbose=verbose,
         backtick_standardize=backtick_standardize,
+        execute=execute,
     )
     updated_content = "\n".join(new_lines).rstrip() + "\n"
+
+    # Post-process to standardize all code fences if requested
+    if standardize:
+        if verbose:
+            print("Standardizing all code fences...")
+        updated_content = standardize_code_fences(updated_content)
+
     if verbose:
         print(f"Writing output to: {output_filepath}")
     output_filepath = (
@@ -418,6 +478,20 @@ def main() -> None:
         help="Disable backtick standardization (default: enabled for separate output files, disabled for in-place)",
         default=False,
     )
+    parser.add_argument(
+        "-s",
+        "--standardize",
+        action="store_true",
+        help="Post-process to standardize ALL code fences, removing 'markdown-code-runner' modifiers",
+        default=False,
+    )
+    parser.add_argument(
+        "-n",
+        "--no-execute",
+        action="store_true",
+        help="Skip code execution entirely (useful with --standardize for compatibility processing only)",
+        default=False,
+    )
 
     args = parser.parse_args()
 
@@ -434,6 +508,8 @@ def main() -> None:
         output_filepath,
         verbose=args.verbose,
         backtick_standardize=backtick_standardize,
+        execute=not args.no_execute,
+        standardize=args.standardize,
     )
 
 
