@@ -176,9 +176,7 @@ def test_remove_md_comment() -> None:
     """Test the remove_md_comment function."""
     input_str = "<!-- This is a comment -->"
     output_str = remove_md_comment(input_str)
-    assert (
-        output_str == "This is a comment"
-    ), f"Expected 'This is a comment', got '{output_str}'"
+    assert output_str == "This is a comment", f"Expected 'This is a comment', got '{output_str}'"
 
     input_str = "This is not a comment"
     with pytest.raises(ValueError, match="Invalid Markdown comment format"):
