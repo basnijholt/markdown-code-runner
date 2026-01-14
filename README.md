@@ -1,5 +1,12 @@
 # Markdown Code Runner
 
+[![PyPI](https://img.shields.io/pypi/v/markdown-code-runner)](https://pypi.org/project/markdown-code-runner/)
+[![Python](https://img.shields.io/pypi/pyversions/markdown-code-runner)](https://pypi.org/project/markdown-code-runner/)
+[![License](https://img.shields.io/github/license/basnijholt/markdown-code-runner)](LICENSE)
+[![Downloads](https://img.shields.io/pypi/dm/markdown-code-runner)](https://pypi.org/project/markdown-code-runner/)
+[![CI](https://img.shields.io/github/actions/workflow/status/basnijholt/markdown-code-runner/pytest.yml?label=tests)](https://github.com/basnijholt/markdown-code-runner/actions/workflows/pytest.yml)
+[![Docs](https://img.shields.io/badge/docs-markdown--code--runner.nijho.lt-blue)](https://markdown-code-runner.nijho.lt)
+
 <img src="https://raw.githubusercontent.com/basnijholt/markdown-code-runner/main/docs/assets/logo.svg" alt="Markdown Code Runner Logo" align="right" style="width: 200px;" />
 
 <!-- SECTION:intro:START -->
