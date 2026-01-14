@@ -22,7 +22,10 @@ Real-world examples demonstrating the power and flexibility of `markdown-code-ru
 <!-- # Remove the github-actions section since it's on its own page -->
 <!-- import re -->
 <!-- # Find where github-actions section starts and ends -->
-<!-- content = re.sub(r"<!-- SECTION:github-actions:START -->.*?<!-- SECTION:github-actions:END -->", "", content, flags=re.DOTALL) -->
+<!-- start_marker = "<!-" + "- SECTION:github-actions:START -" + "->" -->
+<!-- end_marker = "<!-" + "- SECTION:github-actions:END -" + "->" -->
+<!-- pattern = start_marker + ".*?" + end_marker -->
+<!-- content = re.sub(pattern, "", content, flags=re.DOTALL) -->
 <!-- print(content) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
