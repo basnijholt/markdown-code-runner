@@ -13,7 +13,7 @@ This guide will help you install and start using `markdown-code-runner` in minut
 <!-- print(readme_section("installation")) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 
 You can also install with `uv`:
@@ -35,7 +35,7 @@ uv tool install markdown-code-runner
 <!-- print(readme_section("quick-start")) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 
 ## Next Steps

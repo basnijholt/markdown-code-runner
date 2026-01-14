@@ -13,7 +13,7 @@ Automate your Markdown updates with CI/CD workflows.
 <!-- print(readme_section("github-actions")) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 
 ## Workflow Breakdown

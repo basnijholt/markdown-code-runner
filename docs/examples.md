@@ -11,7 +11,7 @@ Real-world examples demonstrating the power and flexibility of `markdown-code-ru
 <!-- print(readme_section("examples")) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 ```
 
@@ -23,7 +23,7 @@ This is an example of a simple code block:
 <!-- print('Hello, world!') -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 ```
 
@@ -38,7 +38,7 @@ First code block:
 <!-- print('Hello, world!') -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 ```
 
@@ -50,7 +50,7 @@ Second code block:
 <!-- print('Hello again!') -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 ```
 
@@ -65,7 +65,7 @@ First code block:
 <!-- print('Hello, world!') -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 
 Second code block:
@@ -74,7 +74,7 @@ Second code block:
 <!-- print('Hello again!') -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 ```
 
@@ -92,7 +92,7 @@ Second code block:
 <!-- print(content) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 ```
 Which is rendered as:

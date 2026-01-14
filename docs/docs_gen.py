@@ -25,13 +25,13 @@ from pathlib import Path
 _MODULE_DIR = Path(__file__).parent
 README_PATH = _MODULE_DIR.parent / "README.md"
 
-# Placeholder comment for OUTPUT sections in docs templates
-# This must be present in committed docs files (not in README.md)
-# Explains our template strategy: output is generated at build time, not committed
+# Placeholder for OUTPUT sections in docs templates
+# The marker is checked by verify_placeholders() to ensure we don't commit generated content
+OUTPUT_PLACEHOLDER_MARKER = "<!-- PLACEHOLDER -->"
 OUTPUT_PLACEHOLDER = (
-    "<!-- ⚠️ This output is generated during CI build. "
-    "We intentionally don't commit generated content to keep docs copyable "
-    "and avoid recursion issues. See docs/docs_gen.py for details. -->"
+    f"{OUTPUT_PLACEHOLDER_MARKER} "
+    "Output is generated during CI build. We don't commit generated content "
+    "to keep docs copyable and avoid recursion. See docs/docs_gen.py"
 )
 
 
@@ -205,7 +205,7 @@ def verify_placeholders(file_path: Path) -> list[int]:
             in_output = False
         elif in_output:
             # Check if this is the placeholder line
-            if OUTPUT_PLACEHOLDER in line:
+            if OUTPUT_PLACEHOLDER_MARKER in line:
                 continue
             # Allow empty lines
             if not line.strip():

@@ -15,7 +15,7 @@ icon: lucide/play
 <!-- print(readme_section("intro")) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 
 <div style="text-align: center; margin: 2rem 0;">
@@ -34,7 +34,7 @@ icon: lucide/play
 <!-- print(readme_section("features")) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 
 ## Why Use Markdown Code Runner?
@@ -44,7 +44,7 @@ icon: lucide/play
 <!-- print(readme_section("problem-statement")) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
 
 ## Quick Example
@@ -93,5 +93,5 @@ Hello, world!
 <!-- print(readme_section("license")) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
-<!-- ⚠️ This output is generated during CI build. We intentionally don't commit generated content to keep docs copyable and avoid recursion issues. See docs/docs_gen.py for details. -->
+<!-- PLACEHOLDER --> Output is generated during CI build. We don't commit generated content to keep docs copyable and avoid recursion. See docs/docs_gen.py
 <!-- OUTPUT:END -->
