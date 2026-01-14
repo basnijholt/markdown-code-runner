@@ -16,6 +16,7 @@ content-type = "text/markdown"
 
 [project.urls]
 Homepage = "https://github.com/basnijholt/markdown-code-runner"
+Documentation = "https://markdown-code-runner.nijho.lt"
 
 [project.optional-dependencies]
 test = ["pytest", "pre-commit", "coverage", "pytest-cov"]

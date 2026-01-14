@@ -10,6 +10,8 @@ It also enables the generation of content such as tables, plots, and other visua
 
 The package is hosted on GitHub: [https://github.com/basnijholt/markdown-code-runner](https://github.com/basnijholt/markdown-code-runner)
 
+:book: **Documentation**: [https://markdown-code-runner.nijho.lt](https://markdown-code-runner.nijho.lt)
+
 <!-- SECTION:features:START -->
 ## :star: Features
 - :rocket: Automatically execute code blocks, including hidden code blocks, within a Markdown file
