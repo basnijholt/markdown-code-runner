@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from markdown_code_runner import (
     ProcessingState,
     _extract_backtick_options,
@@ -351,3 +353,34 @@ old output
     # The auto-generated warning should not appear
     assert "old output" in result
     assert "auto-generated" not in result
+
+
+def test_update_markdown_file_standardize_verbose(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Test update_markdown_file with standardize=True and verbose=True."""
+    input_file = tmp_path / "test.md"
+    output_file = tmp_path / "output.md"
+
+    content = """# Test
+```python markdown-code-runner
+print('hello')
+```
+<!-- OUTPUT:START -->
+old output
+<!-- OUTPUT:END -->"""
+
+    input_file.write_text(content)
+
+    # Test with standardize=True and verbose=True
+    update_markdown_file(
+        input_file,
+        output_file,
+        execute=False,
+        standardize=True,
+        verbose=True,
+    )
+
+    captured = capsys.readouterr()
+    assert "Standardizing all code fences" in captured.out
