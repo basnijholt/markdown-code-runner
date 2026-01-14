@@ -3,14 +3,18 @@
 """Documentation generation utilities for Markdown Code Runner.
 
 Provides functions to extract sections from README.md and transform
-content for the documentation site. Used by markdown-code-runner
-to generate documentation pages from README content.
+content for the documentation site. Docs templates are stored with
+placeholder OUTPUT sections and processed during CI build.
 
-Run from repo root: uv run python docs/docs_gen.py
+Usage:
+    uv run python docs/docs_gen.py              # Generate docs (process in-place)
+    uv run python docs/docs_gen.py --reset      # Reset docs to templates (placeholders)
+    uv run python docs/docs_gen.py --verify     # Verify docs have placeholders
 """
 
 from __future__ import annotations
 
+import argparse
 import os
 import re
 import subprocess
@@ -20,6 +24,10 @@ from pathlib import Path
 # Path to README relative to this module (docs_gen.py is in docs/)
 _MODULE_DIR = Path(__file__).parent
 README_PATH = _MODULE_DIR.parent / "README.md"
+
+# Placeholder comment for OUTPUT sections in docs templates
+# This must be present in committed docs files (not in README.md)
+OUTPUT_PLACEHOLDER = "<!-- ⚠️ This content is auto-generated. Do not edit. -->"
 
 
 def readme_section(section_name: str, *, strip_heading: bool = True) -> str:
@@ -85,79 +93,7 @@ def _transform_readme_links(content: str) -> str:
         content = content.replace(f"]({old_link})", f"]({new_link})")
 
     # Remove ToC link pattern [[ToC](#...)]
-    content = re.sub(r"\[\[ToC\]\([^)]+\)\]", "", content)
-
-    # Escape markers only OUTSIDE code fences to prevent re-execution
-    # Markers inside code fences are examples meant to be copied by users
-    return _escape_markers_outside_fences(content)
-
-
-def _escape_markers_outside_fences(content: str) -> str:
-    """Escape markdown-code-runner markers only outside of code fences.
-
-    This ensures:
-    - Examples inside ```markdown``` fences stay clean and copyable
-    - Working demos outside fences get escaped to prevent re-execution
-
-    Handles nested fences correctly (e.g., ```` containing ```).
-    """
-    # Markers to escape with zero-width space after "<!"
-    marker_patterns = [
-        ("<!-- CODE:START -->", "<!\u200b-- CODE:START -->"),
-        ("<!-- CODE:END -->", "<!\u200b-- CODE:END -->"),
-        ("<!-- CODE:BASH:START -->", "<!\u200b-- CODE:BASH:START -->"),
-        ("<!-- CODE:SKIP -->", "<!\u200b-- CODE:SKIP -->"),
-        ("<!-- OUTPUT:START -->", "<!\u200b-- OUTPUT:START -->"),
-        ("<!-- OUTPUT:END -->", "<!\u200b-- OUTPUT:END -->"),
-    ]
-
-    # Pattern to match executable code blocks
-    executable_block_pattern = re.compile(r"```(\w+)\s+markdown-code-runner")
-
-    # Pattern to detect fence opening/closing (captures the fence characters)
-    fence_pattern = re.compile(r"^(\s*)(`{3,}|~{3,})")
-
-    lines = content.split("\n")
-    result = []
-    fence_delimiter: str | None = None  # Track the opening fence delimiter
-
-    for line in lines:
-        match = fence_pattern.match(line)
-        if match:
-            fence_chars = match.group(2)
-            if fence_delimiter is None:
-                # Opening a new fence - remember the delimiter
-                fence_delimiter = fence_chars[0] * len(fence_chars)
-                result.append(line)
-                continue
-            # Check if this closes the current fence (same char, at least same length)
-            if fence_chars[0] == fence_delimiter[0] and len(fence_chars) >= len(
-                fence_delimiter,
-            ):
-                # Closing the fence
-                fence_delimiter = None
-                result.append(line)
-                continue
-            # Otherwise it's a nested fence marker, treat as content
-            result.append(line)
-            continue
-
-        if fence_delimiter is None:
-            # Outside any fence - escape markers
-            escaped_line = line
-            for old, new in marker_patterns:
-                escaped_line = escaped_line.replace(old, new)
-            # Escape executable code block markers
-            escaped_line = executable_block_pattern.sub(
-                r"```\1 markdown-code-runner" + "\u200b",
-                escaped_line,
-            )
-            result.append(escaped_line)
-        else:
-            # Inside a fence - keep content unchanged
-            result.append(line)
-
-    return "\n".join(result)
+    return re.sub(r"\[\[ToC\]\([^)]+\)\]", "", content)
 
 
 def _find_markdown_files_with_code_blocks(docs_dir: Path) -> list[Path]:
@@ -208,18 +144,176 @@ def _run_markdown_code_runner(files: list[Path], repo_root: Path) -> bool:
     return all_success
 
 
-def main() -> int:
-    """Main entry point for running markdown-code-runner on all docs."""
-    repo_root = _MODULE_DIR.parent
+def reset_output_sections(file_path: Path) -> bool:
+    """Reset all OUTPUT sections in a file to contain only the placeholder.
 
-    # Process docs/ files and README.md
+    Returns True if the file was modified.
+    """
+    content = file_path.read_text()
+    original = content
+
+    # Pattern to match OUTPUT sections and replace their content with placeholder
+    # Matches: <!-- OUTPUT:START -->\n...content...\n<!-- OUTPUT:END -->
+    pattern = re.compile(
+        r"(<!-- OUTPUT:START -->)\n.*?\n(<!-- OUTPUT:END -->)",
+        re.DOTALL,
+    )
+
+    replacement = rf"\1\n{OUTPUT_PLACEHOLDER}\n\2"
+    content = pattern.sub(replacement, content)
+
+    if content != original:
+        file_path.write_text(content)
+        return True
+    return False
+
+
+def verify_placeholders(file_path: Path) -> list[int]:
+    """Verify that all OUTPUT sections contain the placeholder.
+
+    Ignores OUTPUT markers inside fenced code blocks (examples).
+    Returns list of line numbers where violations occur.
+    """
+    content = file_path.read_text()
+    lines = content.split("\n")
+    violations = []
+
+    in_fence = False
+    in_output = False
+    output_start_line = 0
+
+    for i, line in enumerate(lines, 1):
+        # Track fence boundaries (``` or ~~~)
+        stripped = line.lstrip()
+        if stripped.startswith(("```", "~~~")):
+            in_fence = not in_fence
+            continue
+
+        # Skip content inside fences (code examples)
+        if in_fence:
+            continue
+
+        if "<!-- OUTPUT:START -->" in line:
+            in_output = True
+            output_start_line = i
+        elif "<!-- OUTPUT:END -->" in line:
+            in_output = False
+        elif in_output:
+            # Check if this is the placeholder line
+            if OUTPUT_PLACEHOLDER in line:
+                continue
+            # Allow empty lines
+            if not line.strip():
+                continue
+            # Any other content is a violation
+            violations.append(output_start_line)
+            # Skip to end of this output section
+            in_output = False
+
+    return violations
+
+
+def cmd_generate(repo_root: Path, *, include_readme: bool = True) -> int:
+    """Generate docs by running markdown-code-runner on all files."""
     files = _find_markdown_files_with_code_blocks(repo_root / "docs")
-    readme = repo_root / "README.md"
-    if readme.exists() and "<!-- CODE:START -->" in readme.read_text():
-        files.append(readme)
+
+    if include_readme:
+        readme = repo_root / "README.md"
+        if readme.exists() and "<!-- CODE:START -->" in readme.read_text():
+            files.append(readme)
 
     success = _run_markdown_code_runner(files, repo_root)
     return 0 if success else 1
+
+
+def cmd_reset(repo_root: Path) -> int:
+    """Reset docs OUTPUT sections to placeholders."""
+    docs_dir = repo_root / "docs"
+    files = _find_markdown_files_with_code_blocks(docs_dir)
+
+    if not files:
+        print("No docs files with CODE:START markers found.")
+        return 0
+
+    print(f"Resetting {len(files)} file(s) to templates:")
+    modified_count = 0
+    for f in files:
+        rel_path = f.relative_to(repo_root)
+        if reset_output_sections(f):
+            print(f"  ✓ {rel_path}")
+            modified_count += 1
+        else:
+            print(f"  - {rel_path} (no changes)")
+
+    print(f"\nReset {modified_count} file(s) to templates.")
+    return 0
+
+
+def cmd_verify(repo_root: Path) -> int:
+    """Verify docs have placeholders (no processed content committed)."""
+    docs_dir = repo_root / "docs"
+    files = _find_markdown_files_with_code_blocks(docs_dir)
+
+    if not files:
+        print("No docs files with CODE:START markers found.")
+        return 0
+
+    print(f"Verifying {len(files)} docs file(s) have placeholders...")
+    all_valid = True
+
+    for f in files:
+        rel_path = f.relative_to(repo_root)
+        violations = verify_placeholders(f)
+        if violations:
+            print(f"  ✗ {rel_path}: OUTPUT sections at lines {violations} have content")
+            all_valid = False
+        else:
+            print(f"  ✓ {rel_path}")
+
+    if all_valid:
+        print("\nAll docs files have placeholder OUTPUT sections.")
+        return 0
+    print("\nError: Some docs files have processed content.")
+    print("Run 'uv run python docs/docs_gen.py --reset' to fix.")
+    return 1
+
+
+def main() -> int:
+    """Main entry point with subcommands."""
+    parser = argparse.ArgumentParser(
+        description="Documentation generation utilities for Markdown Code Runner.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  uv run python docs/docs_gen.py              # Generate docs (process in-place)
+  uv run python docs/docs_gen.py --reset      # Reset docs to templates
+  uv run python docs/docs_gen.py --verify     # Verify docs have placeholders
+""",
+    )
+    parser.add_argument(
+        "--reset",
+        action="store_true",
+        help="Reset docs OUTPUT sections to placeholders",
+    )
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Verify docs have placeholder OUTPUT sections",
+    )
+    parser.add_argument(
+        "--docs-only",
+        action="store_true",
+        help="Only process docs, not README.md",
+    )
+
+    args = parser.parse_args()
+    repo_root = _MODULE_DIR.parent
+
+    if args.reset:
+        return cmd_reset(repo_root)
+    if args.verify:
+        return cmd_verify(repo_root)
+    return cmd_generate(repo_root, include_readme=not args.docs_only)
 
 
 if __name__ == "__main__":

@@ -35,6 +35,12 @@ jobs:
           uv sync
           uv pip install -e ".[docs]"
 
+      - name: Verify docs templates have placeholders
+        run: uv run python docs/docs_gen.py --verify
+
+      - name: Generate docs content
+        run: uv run python docs/docs_gen.py --docs-only
+
       - name: Build documentation
         run: uv run zensical build
 
