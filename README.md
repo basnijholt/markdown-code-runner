@@ -18,7 +18,7 @@ It also enables the generation of content such as tables, plots, and other visua
 - Keeps the output of the code blocks up-to-date
 - Easily integrates with GitHub Actions
 - No external dependencies and works with Python 3.7+
-- Execute *all* languages by using the file code blocks and executing it with bash (see [Rust example](#idea-6-run-a-rust-program))
+- Execute *all* languages by using the file code blocks and executing it with bash (see [Rust example](#idea-7-run-a-rust-program))
 <!-- SECTION:features:END -->
 
 <!-- SECTION:problem-statement:START -->
