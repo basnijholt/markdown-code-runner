@@ -51,25 +51,25 @@ To get started with `markdown-code-runner`, follow these steps:
     Example:
     <!​-- CODE:SKIP --> <!-- This is here otherwise the next example gets executed -->
     ````markdown
-    ```python markdown-code-runner​
+    ```python markdown-code-runner
     print('Hello, world!')
     ```
     (Optionally, you can place some text between the code block and the output markers)
-    <!​-- OUTPUT:START -->
+    <!-- OUTPUT:START -->
     This content will be replaced by the output of the code block above.
-    <!​-- OUTPUT:END -->
+    <!-- OUTPUT:END -->
     ````
 
     or for Bash:
     <!​-- CODE:SKIP --> <!-- This is here otherwise the next example gets executed -->
     ````markdown
-    ```bash markdown-code-runner​
+    ```bash markdown-code-runner
     echo 'Hello, world!'
     ```
     (Optionally, you can place some text between the code block and the output markers)
-    <!​-- OUTPUT:START -->
+    <!-- OUTPUT:START -->
     This content will be replaced by the output of the code block above.
-    <!​-- OUTPUT:END -->
+    <!-- OUTPUT:END -->
     ````
 
     **Method 2 *(hide your code)*:** Place the code between `<!​-- CODE:START -->` and `<!​-- CODE:END -->` markers. Add the output markers `<!​-- OUTPUT:START -->` and `<!​-- OUTPUT:END -->` where you want the output to be displayed.
@@ -79,12 +79,12 @@ To get started with `markdown-code-runner`, follow these steps:
     ```markdown
     This is an example code block:
 
-    <!​-- CODE:START -->
+    <!-- CODE:START -->
     <!-- print('Hello, world!') -->
-    <!​-- CODE:END -->
-    <!​-- OUTPUT:START -->
+    <!-- CODE:END -->
+    <!-- OUTPUT:START -->
     This content will be replaced by the output of the code block above.
-    <!​-- OUTPUT:END -->
+    <!-- OUTPUT:END -->
     ```
 
     or for Bash:
@@ -92,18 +92,19 @@ To get started with `markdown-code-runner`, follow these steps:
     ```markdown
     This is an example code block:
 
-    <!​-- CODE:BASH:START -->
+    <!-- CODE:BASH:START -->
     <!-- MY_VAR="Hello, World!" -->
     <!-- echo $MY_VAR -->
-    <!​-- CODE:END -->
-    <!​-- OUTPUT:START -->
+    <!-- CODE:END -->
+    <!-- OUTPUT:START -->
     This content will be replaced by the output of the code block above.
-    <!​-- OUTPUT:END -->
+    <!-- OUTPUT:END -->
     ```
 
 2.  Run `markdown-code-runner` on your Markdown file:
 
-    ```bash markdown-code-runner​ /path/to/your/markdown_file.md
+    ```bash
+    markdown-code-runner /path/to/your/markdown_file.md
     ```
 
 3.  The output of the code block will be automatically executed and inserted between the output markers.

@@ -87,8 +87,19 @@ def _transform_readme_links(content: str) -> str:
     # Remove ToC link pattern [[ToC](#...)]
     content = re.sub(r"\[\[ToC\]\([^)]+\)\]", "", content)
 
-    # Escape markdown-code-runner markers in extracted content to prevent re-execution
-    # Add a zero-width space after "<!-" to break the marker pattern
+    # Escape markers only OUTSIDE code fences to prevent re-execution
+    # Markers inside code fences are examples meant to be copied by users
+    return _escape_markers_outside_fences(content)
+
+
+def _escape_markers_outside_fences(content: str) -> str:
+    """Escape markdown-code-runner markers only outside of code fences.
+
+    This ensures:
+    - Examples inside ```markdown``` fences stay clean and copyable
+    - Working demos outside fences get escaped to prevent re-execution
+    """
+    # Markers to escape with zero-width space after "<!"
     marker_patterns = [
         ("<!-- CODE:START -->", "<!\u200b-- CODE:START -->"),
         ("<!-- CODE:END -->", "<!\u200b-- CODE:END -->"),
@@ -97,17 +108,37 @@ def _transform_readme_links(content: str) -> str:
         ("<!-- OUTPUT:START -->", "<!\u200b-- OUTPUT:START -->"),
         ("<!-- OUTPUT:END -->", "<!\u200b-- OUTPUT:END -->"),
     ]
-    for old, new in marker_patterns:
-        content = content.replace(old, new)
 
-    # Also escape backtick code blocks that trigger execution
-    # Replace "```python markdown-code-runner" with escaped version
-    # Use actual zero-width space character (not \u escape) since this is a regex replacement
-    return re.sub(
-        r"```(\w+)\s+markdown-code-runner",
-        r"```\1 markdown-code-runner" + "\u200b",  # Add zero-width space at end
-        content,
-    )
+    # Pattern to match executable code blocks
+    executable_block_pattern = re.compile(r"```(\w+)\s+markdown-code-runner")
+
+    lines = content.split("\n")
+    result = []
+    in_fence = False
+
+    for line in lines:
+        # Check for fence boundaries (``` or ~~~, with optional language)
+        stripped = line.lstrip()
+        if stripped.startswith(("```", "~~~")):
+            in_fence = not in_fence
+            result.append(line)
+            continue
+
+        if not in_fence:
+            # Escape comment markers outside fences
+            escaped_line = line
+            for old, new in marker_patterns:
+                escaped_line = escaped_line.replace(old, new)
+            # Escape executable code block markers
+            escaped_line = executable_block_pattern.sub(
+                r"```\1 markdown-code-runner" + "\u200b",
+                escaped_line,
+            )
+            result.append(escaped_line)
+        else:
+            result.append(line)
+
+    return "\n".join(result)
 
 
 def _find_markdown_files_with_code_blocks(docs_dir: Path) -> list[Path]:
