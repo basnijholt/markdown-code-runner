@@ -27,7 +27,12 @@ README_PATH = _MODULE_DIR.parent / "README.md"
 
 # Placeholder comment for OUTPUT sections in docs templates
 # This must be present in committed docs files (not in README.md)
-OUTPUT_PLACEHOLDER = "<!-- ⚠️ This content is auto-generated. Do not edit. -->"
+# Explains our template strategy: output is generated at build time, not committed
+OUTPUT_PLACEHOLDER = (
+    "<!-- ⚠️ This output is generated during CI build. "
+    "We intentionally don't commit generated content to keep docs copyable "
+    "and avoid recursion issues. See docs/docs_gen.py for details. -->"
+)
 
 
 def readme_section(section_name: str, *, strip_heading: bool = True) -> str:
