@@ -235,6 +235,7 @@ class ProcessingState:
     new_lines: list[str] = field(default_factory=list)
     backtick_options: dict[str, Any] = field(default_factory=dict)
     backtick_standardize: bool = True
+    indent: str = ""  # Indentation prefix of current code block
 
     def process_line(self, line: str, *, verbose: bool = False) -> None:
         """Process a line of the Markdown file."""
@@ -269,6 +270,7 @@ class ProcessingState:
                 self.output = None
                 self.backtick_options = _extract_backtick_options(line)
                 self.section, _ = marker_name.rsplit(":", 1)  # type: ignore[assignment]
+                self.indent = self._get_indent(line)
 
                 # Standardize backticks if needed
                 if (
@@ -280,6 +282,11 @@ class ProcessingState:
                 return line
         return None
 
+    @staticmethod
+    def _get_indent(line: str) -> str:
+        """Extract leading whitespace from a line."""
+        return line[: len(line) - len(line.lstrip())]
+
     def _process_output_start(self, line: str) -> None:
         self.section = "output"
         if not self.skip_code_block:
@@ -287,9 +294,11 @@ class ProcessingState:
                 self.output,
                 list,
             ), f"Output must be a list, not {type(self.output)}, line: {line}"
-            # Trim trailing whitespace from output lines
-            trimmed_output = [line.rstrip() for line in self.output]
-            self.new_lines.extend([line, MARKERS["warning"], *trimmed_output])
+            indent = self._get_indent(line)
+            trimmed_output = [
+                indent + ol.rstrip() if ol.strip() else "" for ol in self.output
+            ]
+            self.new_lines.extend([line, indent + MARKERS["warning"], *trimmed_output])
         else:
             self.original_output.append(line)
 
@@ -300,6 +309,12 @@ class ProcessingState:
             self.skip_code_block = False
         self.original_output = []
         self.output = None  # Reset output after processing end of the output section
+
+    def _strip_indent(self, line: str) -> str:
+        """Strip the code block's indentation prefix from a line."""
+        if self.indent and line.startswith(self.indent):
+            return line[len(self.indent) :]
+        return line
 
     def _process_code(
         self,
@@ -322,8 +337,13 @@ class ProcessingState:
             self.section = "normal"
             self.code = []
             self.backtick_options = {}
+            self.indent = ""
         else:
-            self.code.append(remove_md_comment(line) if remove_comment else line)
+            # remove_md_comment already strips whitespace; for backticks, strip indent
+            code_line = (
+                remove_md_comment(line) if remove_comment else self._strip_indent(line)
+            )
+            self.code.append(code_line)
 
     def _process_comment_code(self, line: str, *, verbose: bool) -> None:
         _, language = self.section.rsplit(":", 1)
