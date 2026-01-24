@@ -21,9 +21,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+from markdown_code_runner import _create_include_section_func
+
 # Path to README relative to this module (docs_gen.py is in docs/)
 _MODULE_DIR = Path(__file__).parent
 README_PATH = _MODULE_DIR.parent / "README.md"
+
+# Create include_section bound to the repo root for use in docs
+include_section = _create_include_section_func(README_PATH)
 
 # Placeholder for OUTPUT sections in docs templates
 # The marker is checked by verify_placeholders() to ensure we don't commit generated content
@@ -38,43 +43,21 @@ OUTPUT_PLACEHOLDER = (
 def readme_section(section_name: str, *, strip_heading: bool = True) -> str:
     """Extract a marked section from README.md.
 
-    Sections are marked with HTML comments:
-    <!-- SECTION:section_name:START -->
-    content
-    <!-- SECTION:section_name:END -->
+    Uses the built-in include_section() function and applies link transformations
+    for the documentation site.
 
     Args:
         section_name: The name of the section to extract
         strip_heading: If True, remove the first heading from the section
 
     Returns:
-        The content between the section markers
+        The content between the section markers, with links transformed for docs site
 
     Raises:
         ValueError: If the section is not found in README.md
 
     """
-    content = README_PATH.read_text()
-
-    start_marker = f"<!-- SECTION:{section_name}:START -->"
-    end_marker = f"<!-- SECTION:{section_name}:END -->"
-
-    start_idx = content.find(start_marker)
-    if start_idx == -1:
-        msg = f"Section '{section_name}' not found in README.md"
-        raise ValueError(msg)
-
-    end_idx = content.find(end_marker, start_idx)
-    if end_idx == -1:
-        msg = f"End marker for section '{section_name}' not found"
-        raise ValueError(msg)
-
-    section = content[start_idx + len(start_marker) : end_idx].strip()
-
-    if strip_heading:
-        # Remove first heading (# or ## or ###)
-        section = re.sub(r"^#{1,3}\s+[^\n]+\n+", "", section, count=1)
-
+    section = include_section(str(README_PATH), section_name, strip_heading=strip_heading)
     return _transform_readme_links(section)
 
 
