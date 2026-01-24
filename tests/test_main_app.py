@@ -958,8 +958,8 @@ def test_indented_code_blocks() -> None:
     assert_process(input_lines, expected_output, backtick_standardize=False)
 
 
-def test_section_function(tmp_path: Path) -> None:
-    """Test the built-in section() function."""
+def test_include_section_function(tmp_path: Path) -> None:
+    """Test the built-in include_section() function."""
     # Create a source file with sections
     source_file = tmp_path / "source.md"
     source_file.write_text(
@@ -990,7 +990,7 @@ Footer text.
         """# Test Doc
 
 <!-- CODE:START -->
-<!-- print(section("source.md", "intro")) -->
+<!-- print(include_section("source.md", "intro")) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
 old content
@@ -1006,8 +1006,8 @@ old content
     assert "old content" not in result
 
 
-def test_section_function_strip_heading(tmp_path: Path) -> None:
-    """Test section() with strip_heading=True."""
+def test_include_section_function_strip_heading(tmp_path: Path) -> None:
+    """Test include_section() with strip_heading=True."""
     source_file = tmp_path / "source.md"
     source_file.write_text(
         """<!-- SECTION:intro:START -->
@@ -1023,7 +1023,7 @@ This is the intro section.
         """# Test Doc
 
 <!-- CODE:START -->
-<!-- print(section("source.md", "intro", strip_heading=True)) -->
+<!-- print(include_section("source.md", "intro", strip_heading=True)) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
 old
@@ -1038,15 +1038,15 @@ old
     assert "This is the intro section." in result
 
 
-def test_section_function_not_found(tmp_path: Path) -> None:
-    """Test section() raises ValueError when section not found."""
+def test_include_section_function_not_found(tmp_path: Path) -> None:
+    """Test include_section() raises ValueError when section not found."""
     source_file = tmp_path / "source.md"
     source_file.write_text("# No sections here\n")
 
     md_file = tmp_path / "test.md"
     md_file.write_text(
         """<!-- CODE:START -->
-<!-- print(section("source.md", "nonexistent")) -->
+<!-- print(include_section("source.md", "nonexistent")) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
 <!-- OUTPUT:END -->
@@ -1057,8 +1057,8 @@ def test_section_function_not_found(tmp_path: Path) -> None:
         update_markdown_file(md_file)
 
 
-def test_section_function_missing_end_marker(tmp_path: Path) -> None:
-    """Test section() raises ValueError when end marker is missing."""
+def test_include_section_function_missing_end_marker(tmp_path: Path) -> None:
+    """Test include_section() raises ValueError when end marker is missing."""
     source_file = tmp_path / "source.md"
     source_file.write_text(
         """<!-- SECTION:broken:START -->
@@ -1069,7 +1069,7 @@ Content without end marker
     md_file = tmp_path / "test.md"
     md_file.write_text(
         """<!-- CODE:START -->
-<!-- print(section("source.md", "broken")) -->
+<!-- print(include_section("source.md", "broken")) -->
 <!-- CODE:END -->
 <!-- OUTPUT:START -->
 <!-- OUTPUT:END -->

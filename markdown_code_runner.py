@@ -64,24 +64,24 @@ def md_comment(text: str) -> str:
     return f"<!-- {text} -->"
 
 
-def _create_section_func(base_path: Path | None) -> Callable[..., str]:
-    """Create a section() function that resolves paths relative to base_path.
+def _create_include_section_func(base_path: Path | None) -> Callable[..., str]:
+    """Create an include_section() function that resolves paths relative to base_path.
 
     Parameters
     ----------
     base_path
         The path to the markdown file being processed. Relative paths in
-        section() calls will be resolved relative to this file's directory.
+        include_section() calls will be resolved relative to this file's directory.
 
     Returns
     -------
     Callable
-        A section(file, name, strip_heading=False) function.
+        An include_section(file, name, strip_heading=False) function.
 
     """
 
-    def section(file: str, name: str, *, strip_heading: bool = False) -> str:
-        """Extract a marked section from a Markdown file.
+    def include_section(file: str, name: str, *, strip_heading: bool = False) -> str:
+        """Include a marked section from a Markdown file.
 
         Sections are marked with HTML comments:
             <!-- SECTION:name:START -->
@@ -134,7 +134,7 @@ def _create_section_func(base_path: Path | None) -> Callable[..., str]:
 
         return result
 
-    return section
+    return include_section
 
 
 MARKERS = {
@@ -466,7 +466,7 @@ def process_markdown(
         return content
 
     # Initialize context with built-in functions
-    initial_context = {"section": _create_section_func(base_path)}
+    initial_context = {"include_section": _create_include_section_func(base_path)}
     state = ProcessingState(backtick_standardize=backtick_standardize, context=initial_context)
 
     for i, line in enumerate(content):
