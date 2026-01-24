@@ -420,12 +420,12 @@ Which is rendered as:
 ```bash
 usage: markdown-code-runner [-h] [-o OUTPUT] [-d] [-v]
                             [--no-backtick-standardize] [-s] [-n]
-                            input
+                            input [input ...]
 
 Automatically update Markdown files with code block output.
 
 positional arguments:
-  input                 Path to the input Markdown file.
+  input                 Path(s) to the input Markdown file(s).
 
 options:
   -h, --help            show this help message and exit
