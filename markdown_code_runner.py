@@ -49,7 +49,7 @@ import subprocess
 from dataclasses import dataclass, field
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Callable, Literal
 
 try:
     __version__ = version("markdown-code-runner")
@@ -62,6 +62,79 @@ DEBUG: bool = os.environ.get("DEBUG", "0") == "1"
 def md_comment(text: str) -> str:
     """Format a string as a Markdown comment."""
     return f"<!-- {text} -->"
+
+
+def _create_section_func(base_path: Path | None) -> Callable[..., str]:
+    """Create a section() function that resolves paths relative to base_path.
+
+    Parameters
+    ----------
+    base_path
+        The path to the markdown file being processed. Relative paths in
+        section() calls will be resolved relative to this file's directory.
+
+    Returns
+    -------
+    Callable
+        A section(file, name, strip_heading=False) function.
+
+    """
+
+    def section(file: str, name: str, *, strip_heading: bool = False) -> str:
+        """Extract a marked section from a Markdown file.
+
+        Sections are marked with HTML comments:
+            <!-- SECTION:name:START -->
+            content here
+            <!-- SECTION:name:END -->
+
+        Parameters
+        ----------
+        file
+            Path to the markdown file (relative to current file, or absolute).
+        name
+            The section name to extract.
+        strip_heading
+            If True, remove the first heading (# through ######) from the section.
+
+        Returns
+        -------
+        str
+            The content between the section markers.
+
+        Raises
+        ------
+        ValueError
+            If the section markers are not found.
+
+        """
+        path = Path(file)
+        if not path.is_absolute() and base_path is not None:
+            path = base_path.parent / path
+
+        content = path.read_text()
+
+        start_marker = f"<!-- SECTION:{name}:START -->"
+        end_marker = f"<!-- SECTION:{name}:END -->"
+
+        start_idx = content.find(start_marker)
+        if start_idx == -1:
+            msg = f"Section '{name}' not found in {file}"
+            raise ValueError(msg)
+
+        end_idx = content.find(end_marker, start_idx)
+        if end_idx == -1:
+            msg = f"End marker for section '{name}' not found in {file}"
+            raise ValueError(msg)
+
+        result = content[start_idx + len(start_marker) : end_idx].strip()
+
+        if strip_heading:
+            result = re.sub(r"^#{1,6}\s+[^\n]+\n+", "", result, count=1)
+
+        return result
+
+    return section
 
 
 MARKERS = {
@@ -363,6 +436,7 @@ def process_markdown(
     verbose: bool = False,
     backtick_standardize: bool = True,
     execute: bool = True,
+    base_path: Path | None = None,
 ) -> list[str]:
     """Executes code blocks in a list of Markdown-formatted strings and returns the modified list.
 
@@ -377,6 +451,9 @@ def process_markdown(
     execute
         If True, execute code blocks and update output sections.
         If False, return content unchanged (useful with post-processing standardization).
+    base_path
+        Path to the markdown file being processed. Used by built-in functions
+        like section() to resolve relative paths.
 
     Returns
     -------
@@ -388,7 +465,9 @@ def process_markdown(
     if not execute:
         return content
 
-    state = ProcessingState(backtick_standardize=backtick_standardize)
+    # Initialize context with built-in functions
+    initial_context = {"section": _create_section_func(base_path)}
+    state = ProcessingState(backtick_standardize=backtick_standardize, context=initial_context)
 
     for i, line in enumerate(content):
         if verbose:
@@ -439,6 +518,7 @@ def update_markdown_file(  # noqa: PLR0913
         verbose=verbose,
         backtick_standardize=backtick_standardize,
         execute=execute,
+        base_path=input_filepath,
     )
     updated_content = "\n".join(new_lines).rstrip() + "\n"
 

@@ -26,6 +26,7 @@ It also enables the generation of content such as tables, plots, and other visua
 - Easily integrates with GitHub Actions
 - No external dependencies and works with Python 3.7+
 - Execute *all* languages by using the file code blocks and executing it with bash (see [Rust example](#idea-7-run-a-rust-program))
+- Built-in `section()` function to extract and reuse content from other Markdown files
 <!-- SECTION:features:END -->
 
 <!-- SECTION:problem-statement:START -->
@@ -50,6 +51,8 @@ This ensures that the displayed output is always in sync with the code, and cont
 - [Examples](#examples)
   - [Example 1: Simple code block](#example-1-simple-code-block)
   - [Example 2: Multiple code blocks](#example-2-multiple-code-blocks)
+- [Built-in Functions](#built-in-functions)
+  - [`section(file, name, strip_heading=False)`](#sectionfile-name-strip_headingfalse)
 - [Usage Ideas](#usage-ideas)
   - [Idea 1: Continuous Integration with GitHub Actions](#idea-1-continuous-integration-with-github-actions)
   - [Idea 2: Show command-line output](#idea-2-show-command-line-output)
@@ -243,6 +246,58 @@ Hello again!
 <!-- OUTPUT:END -->
 ```
 <!-- SECTION:examples:END -->
+
+<!-- SECTION:builtin-functions:START -->
+## Built-in Functions
+
+Code blocks executed by `markdown-code-runner` have access to built-in helper functions.
+
+### `section(file, name, strip_heading=False)`
+
+Extract content from a markdown file that is marked with SECTION markers. This is useful for reusing content across multiple files without duplication.
+
+**Parameters:**
+- `file`: Path to the markdown file (relative to the current file, or absolute)
+- `name`: The section name to extract
+- `strip_heading`: If `True`, removes the first heading from the extracted content
+
+**Example:**
+
+In your source file (`README.md`):
+<!-- CODE:SKIP -->
+```markdown
+<!-- SECTION:intro:START -->
+## Introduction
+
+This is reusable content.
+<!-- SECTION:intro:END -->
+```
+
+In another file that wants to include this section:
+<!-- CODE:SKIP -->
+```markdown
+<!-- CODE:START -->
+<!-- print(section("README.md", "intro")) -->
+<!-- CODE:END -->
+<!-- OUTPUT:START -->
+<!-- OUTPUT:END -->
+```
+
+After running `markdown-code-runner`, the output section will contain:
+```markdown
+## Introduction
+
+This is reusable content.
+```
+
+Use `strip_heading=True` to remove the heading:
+<!-- CODE:SKIP -->
+```markdown
+<!-- CODE:START -->
+<!-- print(section("README.md", "intro", strip_heading=True)) -->
+<!-- CODE:END -->
+```
+<!-- SECTION:builtin-functions:END -->
 
 <!-- SECTION:usage-ideas:START -->
 ## Usage Ideas
