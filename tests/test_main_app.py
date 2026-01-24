@@ -18,6 +18,7 @@ from markdown_code_runner import (
     md_comment,
     process_markdown,
     remove_md_comment,
+    update_markdown_file,
 )
 
 TEST_FOLDER = Path(__file__).parent
@@ -955,3 +956,125 @@ def test_indented_code_blocks() -> None:
         "    <!-- OUTPUT:END -->",
     ]
     assert_process(input_lines, expected_output, backtick_standardize=False)
+
+
+def test_include_section_function(tmp_path: Path) -> None:
+    """Test the built-in include_section() function."""
+    # Create a source file with sections
+    source_file = tmp_path / "source.md"
+    source_file.write_text(
+        """# Main Title
+
+Some intro text.
+
+<!-- SECTION:intro:START -->
+## Introduction
+
+This is the intro section.
+<!-- SECTION:intro:END -->
+
+<!-- SECTION:features:START -->
+## Features
+
+- Feature 1
+- Feature 2
+<!-- SECTION:features:END -->
+
+Footer text.
+"""
+    )
+
+    # Create a markdown file that uses section()
+    md_file = tmp_path / "test.md"
+    md_file.write_text(
+        """# Test Doc
+
+<!-- CODE:START -->
+<!-- print(include_section("source.md", "intro")) -->
+<!-- CODE:END -->
+<!-- OUTPUT:START -->
+old content
+<!-- OUTPUT:END -->
+"""
+    )
+
+    update_markdown_file(md_file)
+
+    result = md_file.read_text()
+    assert "## Introduction" in result
+    assert "This is the intro section." in result
+    assert "old content" not in result
+
+
+def test_include_section_function_strip_heading(tmp_path: Path) -> None:
+    """Test include_section() with strip_heading=True."""
+    source_file = tmp_path / "source.md"
+    source_file.write_text(
+        """<!-- SECTION:intro:START -->
+## Introduction
+
+This is the intro section.
+<!-- SECTION:intro:END -->
+"""
+    )
+
+    md_file = tmp_path / "test.md"
+    md_file.write_text(
+        """# Test Doc
+
+<!-- CODE:START -->
+<!-- print(include_section("source.md", "intro", strip_heading=True)) -->
+<!-- CODE:END -->
+<!-- OUTPUT:START -->
+old
+<!-- OUTPUT:END -->
+"""
+    )
+
+    update_markdown_file(md_file)
+
+    result = md_file.read_text()
+    assert "## Introduction" not in result
+    assert "This is the intro section." in result
+
+
+def test_include_section_function_not_found(tmp_path: Path) -> None:
+    """Test include_section() raises ValueError when section not found."""
+    source_file = tmp_path / "source.md"
+    source_file.write_text("# No sections here\n")
+
+    md_file = tmp_path / "test.md"
+    md_file.write_text(
+        """<!-- CODE:START -->
+<!-- print(include_section("source.md", "nonexistent")) -->
+<!-- CODE:END -->
+<!-- OUTPUT:START -->
+<!-- OUTPUT:END -->
+"""
+    )
+
+    with pytest.raises(ValueError, match="Section 'nonexistent' not found"):
+        update_markdown_file(md_file)
+
+
+def test_include_section_function_missing_end_marker(tmp_path: Path) -> None:
+    """Test include_section() raises ValueError when end marker is missing."""
+    source_file = tmp_path / "source.md"
+    source_file.write_text(
+        """<!-- SECTION:broken:START -->
+Content without end marker
+"""
+    )
+
+    md_file = tmp_path / "test.md"
+    md_file.write_text(
+        """<!-- CODE:START -->
+<!-- print(include_section("source.md", "broken")) -->
+<!-- CODE:END -->
+<!-- OUTPUT:START -->
+<!-- OUTPUT:END -->
+"""
+    )
+
+    with pytest.raises(ValueError, match="End marker for section 'broken' not found"):
+        update_markdown_file(md_file)
