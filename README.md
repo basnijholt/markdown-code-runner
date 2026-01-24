@@ -138,10 +138,16 @@ To get started with `markdown-code-runner`, follow these steps:
     <!-- OUTPUT:END -->
     ```
 
-2.  Run `markdown-code-runner` on your Markdown file:
+2.  Run `markdown-code-runner` on your Markdown file(s):
 
     ```bash
     markdown-code-runner /path/to/your/markdown_file.md
+    ```
+
+    You can also process multiple files at once:
+
+    ```bash
+    markdown-code-runner docs/*.md README.md
     ```
 
 3.  The output of the code block will be automatically executed and inserted between the output markers.
