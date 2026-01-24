@@ -138,10 +138,16 @@ To get started with `markdown-code-runner`, follow these steps:
     <!-- OUTPUT:END -->
     ```
 
-2.  Run `markdown-code-runner` on your Markdown file:
+2.  Run `markdown-code-runner` on your Markdown file(s):
 
     ```bash
     markdown-code-runner /path/to/your/markdown_file.md
+    ```
+
+    You can also process multiple files at once:
+
+    ```bash
+    markdown-code-runner docs/*.md README.md
     ```
 
 3.  The output of the code block will be automatically executed and inserted between the output markers.
@@ -414,12 +420,12 @@ Which is rendered as:
 ```bash
 usage: markdown-code-runner [-h] [-o OUTPUT] [-d] [-v]
                             [--no-backtick-standardize] [-s] [-n]
-                            input
+                            input [input ...]
 
 Automatically update Markdown files with code block output.
 
 positional arguments:
-  input                 Path to the input Markdown file.
+  input                 Path(s) to the input Markdown file(s).
 
 options:
   -h, --help            show this help message and exit

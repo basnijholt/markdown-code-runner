@@ -545,7 +545,8 @@ def main() -> None:
     parser.add_argument(
         "input",
         type=str,
-        help="Path to the input Markdown file.",
+        nargs="+",
+        help="Path(s) to the input Markdown file(s).",
     )
     parser.add_argument(
         "-o",
@@ -589,20 +590,25 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    input_filepath = Path(args.input)
-    output_filepath = Path(args.output) if args.output is not None else input_filepath
+    input_files = [Path(f) for f in args.input]
 
-    # Determine backtick standardization
-    backtick_standardize = False if args.no_backtick_standardize else args.output is not None
+    if args.output is not None and len(input_files) > 1:
+        parser.error("--output cannot be used with multiple input files")
 
-    update_markdown_file(
-        input_filepath,
-        output_filepath,
-        verbose=args.verbose,
-        backtick_standardize=backtick_standardize,
-        execute=not args.no_execute,
-        standardize=args.standardize,
-    )
+    for input_filepath in input_files:
+        output_filepath = Path(args.output) if args.output is not None else input_filepath
+
+        # Determine backtick standardization
+        backtick_standardize = False if args.no_backtick_standardize else args.output is not None
+
+        update_markdown_file(
+            input_filepath,
+            output_filepath,
+            verbose=args.verbose,
+            backtick_standardize=backtick_standardize,
+            execute=not args.no_execute,
+            standardize=args.standardize,
+        )
 
 
 if __name__ == "__main__":

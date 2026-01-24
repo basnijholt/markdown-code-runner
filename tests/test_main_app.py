@@ -201,7 +201,7 @@ def test_main_no_arguments(tmp_path: Path) -> None:
     with patch(
         "argparse.ArgumentParser.parse_args",
         return_value=argparse.Namespace(
-            input=test_filepath,
+            input=[str(test_filepath)],
             output=None,
             verbose=False,
             no_backtick_standardize=True,
@@ -224,7 +224,7 @@ def test_main_filepath_argument(tmp_path: Path) -> None:
     with patch(
         "argparse.ArgumentParser.parse_args",
         return_value=argparse.Namespace(
-            input=test_filepath,
+            input=[str(test_filepath)],
             output=str(output_filepath),
             verbose=False,
             no_backtick_standardize=True,
@@ -247,7 +247,7 @@ def test_main_debug_mode(capfd: pytest.CaptureFixture, tmp_path: Path) -> None:
     with patch(
         "argparse.ArgumentParser.parse_args",
         return_value=argparse.Namespace(
-            input=test_filepath,
+            input=[str(test_filepath)],
             output=str(output_filepath),
             verbose=True,
             no_backtick_standardize=True,
@@ -1078,3 +1078,71 @@ Content without end marker
 
     with pytest.raises(ValueError, match="End marker for section 'broken' not found"):
         update_markdown_file(md_file)
+
+
+def test_main_multiple_files(tmp_path: Path) -> None:
+    """Test the main function with multiple input files."""
+    # Create two test files
+    file1 = tmp_path / "file1.md"
+    file1.write_text(
+        """<!-- CODE:START -->
+<!-- print("file1") -->
+<!-- CODE:END -->
+<!-- OUTPUT:START -->
+old content
+<!-- OUTPUT:END -->
+"""
+    )
+
+    file2 = tmp_path / "file2.md"
+    file2.write_text(
+        """<!-- CODE:START -->
+<!-- print("file2") -->
+<!-- CODE:END -->
+<!-- OUTPUT:START -->
+old content
+<!-- OUTPUT:END -->
+"""
+    )
+
+    with patch(
+        "argparse.ArgumentParser.parse_args",
+        return_value=argparse.Namespace(
+            input=[str(file1), str(file2)],
+            output=None,
+            verbose=False,
+            no_backtick_standardize=True,
+            standardize=False,
+            no_execute=False,
+        ),
+    ):
+        main()
+
+    # Check that both files were processed
+    assert "file1" in file1.read_text()
+    assert "file2" in file2.read_text()
+
+
+def test_main_multiple_files_with_output_error(tmp_path: Path) -> None:
+    """Test that --output with multiple files raises an error."""
+    file1 = tmp_path / "file1.md"
+    file1.write_text("# File 1\n")
+    file2 = tmp_path / "file2.md"
+    file2.write_text("# File 2\n")
+    output = tmp_path / "output.md"
+
+    with (
+        patch(
+            "argparse.ArgumentParser.parse_args",
+            return_value=argparse.Namespace(
+                input=[str(file1), str(file2)],
+                output=str(output),
+                verbose=False,
+                no_backtick_standardize=True,
+                standardize=False,
+                no_execute=False,
+            ),
+        ),
+        pytest.raises(SystemExit),
+    ):
+        main()
