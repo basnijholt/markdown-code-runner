@@ -112,7 +112,7 @@ def _create_include_section_func(base_path: Path | None) -> Callable[..., str]:
         if not path.is_absolute() and base_path is not None:
             path = base_path.parent / path
 
-        content = path.read_text()
+        content = path.read_text(encoding="utf-8")
 
         start_marker = f"<!-- SECTION:{name}:START -->"
         end_marker = f"<!-- SECTION:{name}:END -->"
@@ -200,7 +200,7 @@ def execute_code(
 
     if output_file is not None:
         output_file = Path(output_file)
-        with output_file.open("w") as f:
+        with output_file.open("w", encoding="utf-8") as f:
             f.write(full_code)
         output = []
     elif language == "python":
@@ -509,7 +509,7 @@ def update_markdown_file(  # noqa: PLR0913
     """
     if isinstance(input_filepath, str):  # pragma: no cover
         input_filepath = Path(input_filepath)
-    with input_filepath.open() as f:
+    with input_filepath.open(encoding="utf-8") as f:
         original_lines = [line.rstrip("\n") for line in f.readlines()]
     if verbose:
         print(f"Processing input file: {input_filepath}")
@@ -531,7 +531,7 @@ def update_markdown_file(  # noqa: PLR0913
     if verbose:
         print(f"Writing output to: {output_filepath}")
     output_filepath = input_filepath if output_filepath is None else Path(output_filepath)
-    with output_filepath.open("w") as f:
+    with output_filepath.open("w", encoding="utf-8") as f:
         f.write(updated_content)
     if verbose:
         print("Done!")
