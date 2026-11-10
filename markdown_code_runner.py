@@ -509,7 +509,7 @@ def update_markdown_file(  # noqa: PLR0913
     """
     if isinstance(input_filepath, str):  # pragma: no cover
         input_filepath = Path(input_filepath)
-    with input_filepath.open() as f:
+    with input_filepath.open(encoding="utf-8") as f:
         original_lines = [line.rstrip("\n") for line in f.readlines()]
     if verbose:
         print(f"Processing input file: {input_filepath}")
@@ -531,7 +531,7 @@ def update_markdown_file(  # noqa: PLR0913
     if verbose:
         print(f"Writing output to: {output_filepath}")
     output_filepath = input_filepath if output_filepath is None else Path(output_filepath)
-    with output_filepath.open("w") as f:
+    with output_filepath.open("w", encoding="utf-8") as f:
         f.write(updated_content)
     if verbose:
         print("Done!")
